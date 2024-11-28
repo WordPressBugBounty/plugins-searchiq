@@ -3,8 +3,8 @@ Contributors: searchiq, igorbelykh86, saurabhjaluka, findmsharma
 Tags: Search,Site Search, Better search, Autocomplete, Ajax search, Analytics ,Custom Search,Search Engine ,Relevant search ,Highlight terms , Category tag author search, searchIQ
 Donate link: http://www.searchiq.co/
 Requires at least: 3.7
-Tested up to: 6.4.3
-Stable tag: 4.6
+Tested up to: 6.7.1
+Stable tag: 4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,10 @@ If you face an issue and need help, just send us an email to support@searchiq.co
 2. SearchIQ facet feature sample
 
 == Changelog ==
+= 4.7 =
+* Added fixes for warnings
+* Added fixes for vulnerability reports
+
 = 4.6 =
 * Removed functionality to save errors in searchiq error log file. Using DB to log errors instead.
 

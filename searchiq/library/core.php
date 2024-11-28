@@ -3784,7 +3784,7 @@ class siq_core{
 	
 	protected function validate_post_for_siq($post){
 	 $this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__);
-		if($post->post_status == 'publish'){
+		if(isset($post) && $post instanceof WP_Post && is_object($post) && isset($post->post_status) && $post->post_status == 'publish'){
 			$post_types_indexed = $this->getPostTypesForIndexing(); // get all post types that can be indexed
 			if( in_array($post->post_type, $post_types_indexed) ||  $this->check_if_attachment($post)){				
 				$excludedPostIds = !empty($this->excludePostIds) ? explode(',', $this->excludePostIds) : array();

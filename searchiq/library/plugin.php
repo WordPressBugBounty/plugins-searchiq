@@ -173,12 +173,11 @@ class siq_plugin extends siq_shortcode{
 		 $didAction = did_action('save_post');
 		 if( $didAction > 0){ return; }
 		 if( !in_array( $meta_key, $this->metaFieldsSkipped) && !in_array( $meta_key, $this->siqMetaFieldsSkipped) && $this->lock_meta_update == false){
-			$document_id 		= !empty($object_id) ? $object_id : '' ;
-			$document_data 	= !empty($document_id) ? get_post($document_id) : '';
-			$excludeFields = (is_array($this->excludeCustomFields) && array_key_exists($document_data->post_type, $this->excludeCustomFields) && is_array($this->excludeCustomFields[$document_data->post_type])) ? $this->excludeCustomFields[$document_data->post_type] : array();
+			$document_data 	= get_post($object_id);
+			$excludeFields = $this->checkIfPostTypeIsExcluded($document_data);
 			if( $this->validate_post_for_siq( $document_data ) && !in_array($meta_key, $excludeFields ) ){
 				$this->lock_meta_update = true;
-				$this->siq_update_post($document_id,  $document_data);
+				$this->siq_update_post($object_id,  $document_data);
 			}
 		 }
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
@@ -189,15 +188,18 @@ class siq_plugin extends siq_shortcode{
 		 $didAction = did_action('save_post');
 		 if( $didAction > 0){ return; }
 		 if( !in_array( $meta_key, $this->metaFieldsSkipped) && !in_array( $meta_key, $this->siqMetaFieldsSkipped) && $this->lock_meta_update == false){
-			$document_id 		= !empty($object_id) ? $object_id : '' ;
-			$document_data 	= !empty($document_id) ? get_post($document_id) : '';
-			$excludeFields = (is_array($this->excludeCustomFields) && array_key_exists($document_data->post_type, $this->excludeCustomFields) && is_array($this->excludeCustomFields[$document_data->post_type])) ? $this->excludeCustomFields[$document_data->post_type] : array();
+			$document_data 	= get_post($object_id);
+			$excludeFields = $this->checkIfPostTypeIsExcluded($document_data);
 			if( $this->validate_post_for_siq( $document_data ) && !in_array($meta_key, $excludeFields ) ){
 				$this->lock_meta_update = true;
-				$this->siq_update_post($document_id,  $document_data);
+				$this->siq_update_post($object_id,  $document_data);
 			}
 		}
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
+	}
+
+	public function checkIfPostTypeIsExcluded($post){
+		return (is_object($post) && isset($post->post_type) && is_array($this->excludeCustomFields) && array_key_exists($post->post_type, $this->excludeCustomFields) && is_array($this->excludeCustomFields[$post->post_type])) ? $this->excludeCustomFields[$post->post_type] : array();
 	}
 
 	public static function clearLink($link, $replaceWithPub = false){
@@ -1371,7 +1373,7 @@ class siq_plugin extends siq_shortcode{
 				foreach($result['response'] as $k => $v){
 					if($v['domain'] == $this->domain){
 						$result['engineName'] 	= $v['name'];
-						update_option($this->pluginOptions['engine_name'], $v['name']);
+						update_option($this->pluginOptions['engine_name'], $v['domain']);
 						update_option($this->pluginOptions['engine_code'], $v['engineKey']);
 						$this->pluginSettings['engine_code'] =  $v['engineKey'];
 						$result['message'] = "Authentication successful. Moving to next step, please wait..";
@@ -1873,7 +1875,7 @@ class siq_plugin extends siq_shortcode{
 				update_option($this->pluginOptions['use_custom_search'], "yes");
 			}
 			update_option($this->pluginOptions['engine_just_created'], "1");
-			$engine_name	=	$result['name'];
+			$engine_name	=	$result['domain'];
 			$engine_code	=	$result['engineKey'];
 			update_option($this->pluginOptions['engine_name'], $engine_name);
 			update_option($this->pluginOptions['engine_code'], $engine_code);
@@ -3056,7 +3058,11 @@ class siq_plugin extends siq_shortcode{
 	public function get_siq_engine_details(){
 		$engine_name = get_option($this->pluginOptions['engine_name'], '');
 		$engine_code = get_option($this->pluginOptions['engine_code'], '');
-		return array('name' => $engine_name, 'code' => $engine_code, 'domain' => 'http://'.$engine_name);
+		$re = '/^(http|https):\/\//m';
+		if (!preg_match($re, $engine_name)):
+			$engine_name = 'http://'.$engine_name;
+		endif;
+		return array('name' => $engine_name, 'code' => $engine_code, 'domain' => $engine_name);
 	}
 
 	public function get_siq_partner_js_tag(){

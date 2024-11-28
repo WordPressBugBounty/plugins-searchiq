@@ -59,14 +59,14 @@ class siq_shortcode extends siq_hooks{
 		$searchValue    = get_search_query();
 		$placeholder    = !empty($atts['placeholder']) ? $atts['placeholder'] : "Search";
 		$width			= $this->calculateWidth($atts['width']);
-		$cssStyle		= !empty($width) ? "style='width:".$width.";' ": "";
+		$cssStyle		= !empty($width) ? "style=". esc_attr("width:".$width."; "): "";
 		$placementClass =  ($atts['placement'] == "right") ? "moveToExtremeRight" : "";
 		$strWidget .='<div class="siq-expandwdgt-cont siq-searchwidget '.$placementClass.'">
 		  <form class="siq-expandwdgt siq-searchwidget" action="'.get_home_url().'">
-		    <input type="search" placeholder="'.$placeholder.'" '.$cssStyle.' value="'.$searchValue.'" name="s" class="siq-expandwdgt-input siq-searchwidget-input" aria-label="Field for entering a search query">';
+		    <input type="search" placeholder="'.esc_attr($placeholder).'" '.$cssStyle.' value="'.$searchValue.'" name="s" class="siq-expandwdgt-input siq-searchwidget-input" aria-label="Field for entering a search query">';
 			$postTypes 		= !empty($atts['postTypes'] ) ? $atts['postTypes'] : "";
 			if(!empty($postTypes)){
-				$strWidget 		.='<input type="hidden"  value="'.$postTypes.'" name="postTypes" />';
+				$strWidget 		.='<input type="hidden"  value="'.esc_attr($postTypes).'" name="postTypes" />';
 			}
 		    $strWidget .='<span class="siq-expandwdgt-icon"></span>
 		  </form>
