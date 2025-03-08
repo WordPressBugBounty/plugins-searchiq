@@ -62,9 +62,9 @@ $styling					= $this->getMobileStyling($stylingVar);
 
  ?>
 <div class="wsplugin">
- <h2>SearchIQ: Mobile <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php _e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
+ <h2>SearchIQ: Mobile <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
  <div class="dwAdminHeading">You can change appearance for mobile here.</div>
- <form method="POST" novalidate action="<?php _e(esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-5') ) ); ?>" onsubmit="return SIQ_validateMobileSettingsForm();" class="custom_page_options" name="custom_options">
+ <form method="POST" novalidate action="<?php esc_html_e(esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-5') ) ); ?>" onsubmit="return SIQ_validateMobileSettingsForm();" class="custom_page_options" name="custom_options">
 	<div class="section section-1">
 		<h2>Mobile</h2>
         <div class="data">
@@ -119,7 +119,7 @@ $styling					= $this->getMobileStyling($stylingVar);
         </div>
         <div class="data">
             <label>Result Title Font Size</label>
-            <?php _e( wp_kses( $this->getFontSizeBox('styling[resultTitleFontSize]', $styling['resultTitleFontSize'], 10, 60), $this->kses_allowed_html_searchbox ) ); ?>
+            <?php echo wp_kses( $this->getFontSizeBox('styling[resultTitleFontSize]', $styling['resultTitleFontSize'], 10, 60), $this->kses_allowed_html_searchbox ); ?>
         </div>
         <div class="data">
             <label>Enable Float Search Bar</label>

@@ -198,9 +198,9 @@ $siq_posts_per_delta_call = $this->getPostsPerDeltaCall();
 $siq_api_call_timeout = $this->getApiCallTimeout();
 ?>
 <div class="wsplugin">
-	<h2>SearchIQ: Plugin options <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php _e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
+	<h2>SearchIQ: Plugin options <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
 	<div class="dwAdminHeading">You can set options for the plugin on this page.</div>
-	<form method="POST" action="<?php _e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-2') ) ); ?>" class="custom_page_options" name="custom_options" onSubmit="return checkSiqOptions();">
+	<form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-2') ) ); ?>" class="custom_page_options" name="custom_options" onSubmit="return checkSiqOptions();">
 		<div class="section section-1">
 			<h2>General</h2>
 			<div class="data">
@@ -231,7 +231,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<label>Default thumbnail url<br/>
 					<small>Url entered here will be used as default thumbnail(in case post thumbnail does not exist) for the search results from SearchIQ.<br/>
 						Enter image url  in the text box directly or click on <b>"Select/Upload Thumbnail"</b> button to select image from wordpress media</small></label>
-				<input type="text" name="siq_default_thumbnail" class="textbox large"  value="<?php _e( esc_url( $defaultThumbnail ) );?>"/>
+				<input type="text" name="siq_default_thumbnail" class="textbox large"  value="<?php esc_html_e( esc_url( $defaultThumbnail ) );?>"/>
 				<input type="button" id="siq_default_thumbnail_uploader" class="btn" value="Select/Upload Thumbnail" />
 			</div>
 			<?php if($this->allowHideLogo){ ?>
@@ -300,15 +300,15 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<div class="">SearchIQ searchbox shortcode can be used on all pages, posts and sidebars</div><br/>
 				<code>[siq_searchbox type="search-bar" placeholder="Search here" post-types="post,page" width="500" placement="left"]</code><br/>
 				<div class="">In the shortcode all the fields i.e. type, placeholder, post-types, width and placement are optional.</div><br/>
-				<div class="">More information on the shortcode options can be found <a href="<?php _e( esc_url( $this->userGuideLink.'#guide-shortcode' ) ); ?>" target="_blank">here</a></div><br/>
+				<div class="">More information on the shortcode options can be found <a href="<?php esc_html_e( esc_url( $this->userGuideLink.'#guide-shortcode' ) ); ?>" target="_blank">here</a></div><br/>
 			</div>
 			<h3><b>Using Widget</b></h3>
 			<div class="data">
-				<div>Searchiq search widget is availabe on widgets screen which can be reached from <a href="<?php _e( esc_url( get_admin_url().'widgets.php' ) ); ?>"><b>here</b></a>
+				<div>Searchiq search widget is availabe on widgets screen which can be reached from <a href="<?php esc_html_e( esc_url( get_admin_url().'widgets.php' ) ); ?>"><b>here</b></a>
 					<br/>See image below
 				</div><br/>
 				<div class="helpWrap">
-					<img src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-box-widget.png' ) ); ?>" />
+					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-box-widget.png' ) ); ?>" />
 				</div>
 			</div>
 			<h3><b>Using Icon in menu</b></h3>
@@ -317,9 +317,9 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					Select the menu you want to add search icon to<br/>
 					<small>This will add a search icon at the right side of the menu you select. Clicking the icon will open a search box. See image below</small>
 				</label>
-				<?php _e( wp_kses( $this->getMenuLocationSelectBox('siq_menu_select_box', $siq_menu_selected), $this->kses_allowed_html_searchbox ) );?>
+				<?php echo wp_kses( $this->getMenuLocationSelectBox('siq_menu_select_box', $siq_menu_selected), $this->kses_allowed_html_searchbox );?>
 				<div class="helpWrap">
-					<img src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-1.png' ) ); ?>" />
+					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-1.png' ) ); ?>" />
 				</div>
 			</div>
 			<div class="data">
@@ -330,7 +330,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<input type="checkbox" name="siq_menu_select_box_pos_absolute" id="siq_menu_select_box_pos_absolute" <?php esc_html_e( ($siq_menu_select_box_pos_absolute == 'yes')? "checked=checked": "" );?> value="yes"/>
 				</div>
 				<div class="helpWrap">
-					<img src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-extreme-right.png' ) ); ?>" />
+					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-extreme-right.png' ) ); ?>" />
 				</div>
 			</div>
 			<div class="data">
@@ -357,7 +357,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<input type="text" name="siq_menu_select_box_pos_right" id="siq_menu_select_box_pos_right" class="textbox small" value="<?php esc_html_e( $siq_menu_select_box_pos_right );?>"/>px
 				</div>
 				<div class="helpWrap">
-					<img src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-right.png' ) ); ?>" />
+					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-right.png' ) ); ?>" />
 				</div>
 			</div>
 			<div class="data">
@@ -368,7 +368,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<input type="text" name="siq_menu_select_box_pos_top" id="siq_menu_select_box_pos_top" class="textbox small" value="<?php esc_html_e( $siq_menu_select_box_pos_top );?>"/>px
 				</div>
 				<div class="helpWrap">
-					<img src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-top.png' ) ); ?>" />
+					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-top.png' ) ); ?>" />
 				</div>
 			</div>
 			<?php if($this->woocommerceActive){ ?> 

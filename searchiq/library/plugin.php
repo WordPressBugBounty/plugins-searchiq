@@ -67,7 +67,15 @@ class siq_plugin extends siq_shortcode{
     public $post_ids = array();
     public $resultPostIds = array();
 	public $siq_db_version = '1.4';
-	private $ajaxTimeoutCushion = 5000; 
+	private $ajaxTimeoutCushion = 5000;
+	public $signUpLink;
+	public $userGuideLink;
+	public $forgotPasswordLink;
+	public $pricingPageLink;
+	public $loginPageLink;
+	public $pluginIconUrl;
+	public $siq_custom_get_param;
+	public $siq_menu_select_box_direction;
 
 	public static function init(){
 		new self;
@@ -240,7 +248,7 @@ class siq_plugin extends siq_shortcode{
 			header('content-type: application/json');
 			$this->log_error("SIQ AJAX ERROR:script shut down: result('".json_encode($result)."');","error");
 			$response = $result;
-			_e( json_encode($response) );
+			esc_html_e( json_encode($response) );
 			die();
 		}else if($error['type'] != ""){
 			$type = $this->FriendlyErrorType($error['type']);
@@ -728,7 +736,7 @@ class siq_plugin extends siq_shortcode{
 
 	public function includeContainerScript($preview = false){
 		if( $this->is_partner() ){
-			_e(wp_kses($this->get_siq_partner_js_tag(), $this->kses_allowed_html_config));
+			echo wp_kses($this->get_siq_partner_js_tag(), $this->kses_allowed_html_config);
 		}else{
 			if( !wp_is_json_request() || $preview === true ){
 				$baseUrl = $this->getScriptBaseUrl();
@@ -833,7 +841,7 @@ class siq_plugin extends siq_shortcode{
 			$this->log_error("SIQ AJAX ERROR:script execution terminated: ".__FILE__.":".__FUNCTION__." error('".json_encode($result)."');","error");
 			header('content-type: application/json');
 			$response = $result;
-			_e( json_encode($response) );
+			esc_html_e( json_encode($response) );
 			exit;
 		}
 	}
@@ -1013,7 +1021,7 @@ class siq_plugin extends siq_shortcode{
 		$response = $result;
 		$this->log_error("SIQ AJAX CALL COMPLETE: response('".json_encode($response)."')"."\n");
 		$this->resultSent = 1;
-		_e( json_encode($response) );
+		echo json_encode($response);
 		exit;
 	}
 
@@ -2640,7 +2648,7 @@ class siq_plugin extends siq_shortcode{
 	public function checkFacetsError($show){ ?>
 		<script type="text/javascript">
 			$jQu	        = jQuery.noConflict();
-			var showFacet   = <?php _e( esc_js( $show ) );?>;
+			var showFacet   = <?php echo esc_js( $show );?>;
 			$jQu(window).load(function(){
 				if(showFacet == 1) {
 					$jQu("#tab-6 a").trigger("click");
@@ -2840,9 +2848,9 @@ class siq_plugin extends siq_shortcode{
 	public function facetsTabContentHtml(){
 		$html = "";
 		ob_start();
-			_e('<div class="tab tab-6 notselected hide">');
+			echo wp_kses('<div class="tab tab-6 notselected hide">', $this->kses_allowed_html_config);
 			include_once(SIQ_BASE_PATH . '/templates/backend/facets.php');
-			_e('</div>');
+		echo wp_kses('</div>', $this->kses_allowed_html_config);
 		$html .= ob_get_contents();
 		ob_end_clean();
 		return $html;

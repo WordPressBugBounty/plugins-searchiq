@@ -52,9 +52,9 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 
  ?>
 <div class="wsplugin">
- <h2>SearchIQ: Autocomplete <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php _e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
+ <h2>SearchIQ: Autocomplete <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
  <div class="dwAdminHeading">You can change appearance of autocomplete here. You can use the textbox on right to see the results.</div>
- <form method="POST" action="<?php _e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-4') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-autocomplete-form" name="custom_options">
+ <form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-4') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-autocomplete-form" name="custom_options">
 	<div class="section section-1">
 		<h2>Autocomplete block</h2>
 			<div class="data">
@@ -116,7 +116,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		<h2>Result List Item</h2>
 		<div class="data">
 			<label>Font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultFontSize]', $styling['resultFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultFontSize]', $styling['resultFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		</div>
 		<div class="data">
 			<label>Text Color</label>
@@ -125,7 +125,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		</div>
 		<div class="data">
 			<label>Highlighted text font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[highlightFontSize]', $styling['highlightFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[highlightFontSize]', $styling['highlightFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		</div>
 		<div class="data">
 			<label>Highlighted text Color</label>
@@ -147,7 +147,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		 </div>
 		 <div class="data">
 			 <label>Font size</label>
-			 <?php _e( wp_kses( $this->getFontSizeBox('styling[hoverResultFontSize]', $styling['hoverResultFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			 <?php echo wp_kses( $this->getFontSizeBox('styling[hoverResultFontSize]', $styling['hoverResultFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		 </div>
 		 <div class="data">
 			 <label>Text Color</label>
@@ -156,7 +156,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		 </div>
 		 <div class="data">
 			 <label>Highlighted text font size</label>
-			 <?php _e( wp_kses( $this->getFontSizeBox('styling[hoverHighlightFontSize]', $styling['hoverHighlightFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			 <?php echo wp_kses( $this->getFontSizeBox('styling[hoverHighlightFontSize]', $styling['hoverHighlightFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		 </div>
 		 <div class="data">
 			 <label>Highlighted text Color</label>

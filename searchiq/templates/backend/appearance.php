@@ -103,9 +103,9 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 
 ?>
 <div class="wsplugin">
- <h2>SearchIQ: Results Page <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php _e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ) ); ?>"> User Guide</a></h2>
+ <h2>SearchIQ: Results Page <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ) ); ?>"> User Guide</a></h2>
  <div class="dwAdminHeading">You can change appearance of custom ajax results page here. You can use the textbox on right to see the results.</div>
- <form method="POST" action="<?php _e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-3') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-results-styling-form" name="custom_options" onSubmit="">
+ <form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-3') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-results-styling-form" name="custom_options" onSubmit="">
      <div class="section section-0">
          <h2>Search</h2>
          <div class="data">
@@ -209,7 +209,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Result Title</h2>
 		<div class="data">
 			<label>Font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultTitleFontSize]', $styling['resultTitleFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultTitleFontSize]', $styling['resultTitleFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		
 		</div>
 		<div class="data">
@@ -226,7 +226,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
                 </div>
 		<div class="data">
 			<label>Font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultAuthDateFontSize]', $styling['resultAuthDateFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultAuthDateFontSize]', $styling['resultAuthDateFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		
 		</div>
 		
@@ -240,7 +240,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Body Text</h2>
 		<div class="data">
 			<label>Font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultTextFontSize]', $styling['resultTextFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultTextFontSize]', $styling['resultTextFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		
 		</div>
 		<div class="data">
@@ -257,7 +257,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
                 </div>
 		<div class="data">
 			<label>Title font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultCatTitleFontSize]', $styling['resultCatTitleFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultCatTitleFontSize]', $styling['resultCatTitleFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		
 		</div>
 		<div class="data">
@@ -279,7 +279,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
                 </div>
 		<div class="data">
 			<label>Font size</label>
-			<?php _e( wp_kses( $this->getFontSizeBox('styling[resultTagFontSize]', $styling['resultTagFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+			<?php echo wp_kses( $this->getFontSizeBox('styling[resultTagFontSize]', $styling['resultTagFontSize']), $this->kses_allowed_html_searchbox ); ?>
 		
 		</div>
 		<div class="data">
@@ -297,7 +297,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
                 </div>
          <div class="data">
              <label>URL Font Size</label>
-             <?php _e( wp_kses( $this->getFontSizeBox('siq_resultPageCustomSearchItemLinkFontSize', $settings['siq_resultPageCustomSearchItemLinkFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+             <?php echo wp_kses( $this->getFontSizeBox('siq_resultPageCustomSearchItemLinkFontSize', $settings['siq_resultPageCustomSearchItemLinkFontSize']), $this->kses_allowed_html_searchbox ); ?>
          </div>
          <div class="data without-line">
              <label>URL Font Color</label>
@@ -318,7 +318,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          </div>
          <div class="data">
              <label>Font size</label>
-             <?php _e( wp_kses( $this->getFontSizeBox('styling[paginationFontSize]', $styling['paginationFontSize']), $this->kses_allowed_html_searchbox ) ); ?>
+             <?php echo wp_kses( $this->getFontSizeBox('styling[paginationFontSize]', $styling['paginationFontSize']), $this->kses_allowed_html_searchbox ); ?>
          </div>
          <div class="data without-line">
              <label>Selected page background</label>

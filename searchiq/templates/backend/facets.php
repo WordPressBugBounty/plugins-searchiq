@@ -65,13 +65,13 @@ if ($this->pluginSettings['facets_enabled']) {
     ?>
 
     <script>
-        var SIQ_postTypes = <?php _e( json_encode(array_values($postTypes)) );?>;
+        var SIQ_postTypes = <?php echo json_encode(array_values($postTypes));?>;
     </script>
 
 <div class="wsplugin">
     <h2>Facets</h2>
     <div class="wpAdminHeading">Here you can add facets to display in autocomplete and on result page</div>
-    <form action="<?php _e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-6') ) );?>" method="post">
+    <form action="<?php echo esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-6') );?>" method="post">
         <div class="section section-0">
             <div class="data">
                 <label>Enable facets in autocomplete</label>
@@ -132,7 +132,7 @@ if ($this->pluginSettings['facets_enabled']) {
                                     <td><label>Field</label></td>
                                     <td>
                                         <select name="siqFacetField[]" required onchange="SIQ_changeFacetField(<?php esc_html_e( $i );?>);">
-                                            <?php _e( wp_kses( $this->buildFacetFieldOptionList($facet['postType'], $mapping, $facet['field']), $this->kses_allowed_html_searchbox ) ); ?>
+                                            <?php echo wp_kses( $this->buildFacetFieldOptionList($facet['postType'], $mapping, $facet['field']), $this->kses_allowed_html_searchbox ); ?>
                                         </select>
                                         <input type="hidden" name="siqFacetTargetField[]" value="<?php esc_html_e( !is_null($correctFacetTargetField) ? $correctFacetTargetField : "" );?>"/>
                                     </td>
@@ -165,7 +165,7 @@ if ($this->pluginSettings['facets_enabled']) {
                         <?php
                     }
                 } else {
-                    _e( wp_kses( "<div class='siq-no-facets'>No facet created. Click &laquo;Add facet&raquo; button.</div>", $this->kses_allowed_html_config ) );
+                    echo wp_kses( "<div class='siq-no-facets'>No facet created. Click &laquo;Add facet&raquo; button.</div>", $this->kses_allowed_html_config );
                 }
                 ?>
             </div>

@@ -45,12 +45,12 @@ class SIQ_Search_Widget extends WP_Widget {
 
 	public function widget( $args, $instance ) {
 		global $siq_plugin;
-		_e( $args['before_widget'] );
+		echo $args['before_widget'];
 		if ( ! empty( $instance['title'] ) ) {
-			_e( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
+			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title']) . $args['after_title'];
 		}
-		_e( wp_kses( $this->getWidgetHtml($instance), $siq_plugin->kses_allowed_html_config ) );
-		_e( $args['after_widget'] );
+		echo wp_kses( $this->getWidgetHtml($instance), $siq_plugin->kses_allowed_html_config );
+		echo $args['after_widget'];
 	}
 
 	public function getWidgetHtml($instance = array()){
@@ -110,7 +110,7 @@ class SIQ_Search_Widget extends WP_Widget {
 		</p>
 
 		<p>
-			<label for="<?php esc_attr_e( $this->get_field_id( 'placeholder' ) ); ?>"><b><?php _e( esc_attr( 'Placeholder Text:' ) ); ?></b></label>
+			<label for="<?php esc_attr_e( $this->get_field_id( 'placeholder' ) ); ?>"><b><?php esc_html_e( esc_attr( 'Placeholder Text:' ) ); ?></b></label>
 			<input class="widefat" id="<?php esc_attr_e( $this->get_field_id( 'placeholder' ) ); ?>" name="<?php esc_attr_e( $this->get_field_name( 'placeholder' ) ); ?>" type="text" value="<?php esc_attr_e( $placeholder ); ?>">
 		</p>
 		<?php 
@@ -119,7 +119,7 @@ class SIQ_Search_Widget extends WP_Widget {
 				$postTypes = ! empty( $instance['postTypes'] ) ? ( !is_array( $instance['postTypes'] ) ? explode(',', $instance['postTypes']) : $instance['postTypes'] ) : array();
 		?>
 			<p>
-				<label><b><?php _e( esc_attr( 'Post types for search:' ) ); ?></b></label><br/>
+				<label><b><?php esc_html_e( esc_attr( 'Post types for search:' ) ); ?></b></label><br/>
 				<?php 
 					foreach($postTypeForSearch as $k => $v) { 
 						$checked = in_array($v, $postTypes) ? "checked=checked" : "";

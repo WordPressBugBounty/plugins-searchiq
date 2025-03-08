@@ -4,7 +4,7 @@ Tags: Search,Site Search, Better search, Autocomplete, Ajax search, Analytics ,C
 Donate link: http://www.searchiq.co/
 Requires at least: 3.7
 Tested up to: 6.7.1
-Stable tag: 4.7
+Stable tag: 4.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,9 @@ If you face an issue and need help, just send us an email to support@searchiq.co
 2. SearchIQ facet feature sample
 
 == Changelog ==
+= 4.8 =
+* Added fixes for vulnerability report related to shortcode
+
 = 4.7 =
 * Added fixes for warnings
 * Added fixes for vulnerability reports

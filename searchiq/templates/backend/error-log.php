@@ -13,7 +13,7 @@ if (isset($_GET['delete']) && sanitize_text_field($_GET['delete']) > 0) {
         $this->deleteAPIErrorLogRecord($delete_record_id);
         $redirect = '?page=dwsearch&tab=tab-7&err_log_page=' . min($page, $max_page) . '&records_per_page=' . $limit;
         ?>
-    <script type="text/javascript">location.href = '<?php echo $redirect; ?>';</script><?php
+    <script type="text/javascript">location.href = '<?php echo esc_url($redirect); ?>';</script><?php
          exit;
     }else {
         $nonceError = true;
@@ -25,7 +25,7 @@ if (isset($_GET['delete_all']) && sanitize_text_field($_GET['delete_all']) == 1)
         $this->deleteAllAPIErrorLogRecords();
         $redirect = '?page=dwsearch&tab=tab-7&err_log_page=0&records_per_page=' . $limit;
         ?>
-        <script type="text/javascript">location.href = '<?php echo $redirect; ?>';</script><?php
+        <script type="text/javascript">location.href = '<?php echo esc_url($redirect); ?>';</script><?php
            exit;
     } else {
         $nonceError = true;
@@ -35,7 +35,7 @@ if (isset($_GET['delete_all']) && sanitize_text_field($_GET['delete_all']) == 1)
 if ($page > $max_page || $page < 0) {
     $redirect = '?page=dwsearch&tab=tab-7&err_log_page=' . $max_page . '&records_per_page=' . $limit;
     ?>
-    <script type="text/javascript">location.href = '<?php echo $redirect; ?>';</script>
+    <script type="text/javascript">location.href = '<?php echo esc_url($redirect); ?>';</script>
     <?php
     exit;
 }
@@ -51,7 +51,7 @@ if ($page > $max_page || $page < 0) {
         <?php
         if ($recordsCount > 0) {
             ?><a
-                href="<?php echo add_query_arg('_wpnonce', wp_create_nonce('delete_all_errorlog'), '?page=dwsearch&tab=tab-7&delete_all=1') ?>"
+                href="<?php echo esc_url(add_query_arg('_wpnonce', wp_create_nonce('delete_all_errorlog'), '?page=dwsearch&tab=tab-7&delete_all=1')) ?>"
                 onclick="return confirm('Are you sure you want to delete all error log records?');">Delete All Records</a><?php
         }
         ?>
@@ -83,17 +83,17 @@ if ($page > $max_page || $page < 0) {
                         foreach ($records as $row) {
                             ?>
                             <tr>
-                                <td style="white-space: nowrap;"><?php _e($row->timestamp); ?></td>
-                                <td><?php _e($row->request_method); ?></td>
+                                <td style="white-space: nowrap;"><?php esc_html_e($row->timestamp); ?></td>
+                                <td><?php esc_html_e($row->request_method); ?></td>
                                 <td>
-                                    <div class="siq-tbl-wrp-long-content"><?php _e($row->request_url); ?></div>
+                                    <div class="siq-tbl-wrp-long-content"><?php esc_html_e($row->request_url); ?></div>
                                 </td>
                                 <td>
-                                    <div class="siq-tbl-wrp-long-content"><?php _e($row->request_body); ?></div>
+                                    <div class="siq-tbl-wrp-long-content"><?php esc_html_e($row->request_body); ?></div>
                                 </td>
-                                <td><?php _e($row->status_code); ?></td>
+                                <td><?php esc_html_e($row->status_code); ?></td>
                                 <td>
-                                    <div class="siq-tbl-wrp-long-content"><?php _e($row->response); ?></div>
+                                    <div class="siq-tbl-wrp-long-content"><?php esc_html_e($row->response); ?></div>
                                 </td>
                                 <td><a
                                         href="<?php esc_html_e(add_query_arg('_wpnonce', wp_create_nonce('delete_single_errorlog'),"?page=dwsearch&tab=tab-7&delete=" . $row->id . "&err_log_page=" . $page . "&records_per_page=" . $limit)); ?>">delete</a>
@@ -116,17 +116,17 @@ if ($page > $max_page || $page < 0) {
                 $pagination_end = min($pagination_last, $page + 3);
                 if ($pagination_first < $pagination_start) {
                     ?><a class="error-log-pagination pagination-link active"
-                        href="<?php esc_html_e($link_tpl . $pagination_first); ?>"><?php _e($pagination_first + 1); ?></a><?php
+                        href="<?php esc_html_e($link_tpl . $pagination_first); ?>"><?php esc_html_e($pagination_first + 1); ?></a><?php
                 }
                 if ($pagination_first + 1 < $pagination_start) {
                     ?><span class="error-log-pagination">...</span><?php
                 }
                 for ($i = $pagination_start; $i <= $pagination_end; $i++) {
                     if ($page === $i) {
-                        ?><span class="error-log-pagination pagination-link"><?php _e($i + 1); ?></span><?php
+                        ?><span class="error-log-pagination pagination-link"><?php esc_html_e($i + 1); ?></span><?php
                     } else {
                         ?><a class="error-log-pagination pagination-link active"
-                            href="<?php esc_html_e($link_tpl . $i); ?>"><?php _e($i + 1); ?></a><?php
+                            href="<?php esc_html_e($link_tpl . $i); ?>"><?php esc_html_e($i + 1); ?></a><?php
                     }
                 }
                 if ($pagination_end + 1 < $pagination_last) {
@@ -134,7 +134,7 @@ if ($page > $max_page || $page < 0) {
                 }
                 if ($pagination_end < $pagination_last) {
                     ?><a class="error-log-pagination pagination-link active"
-                        href="<?php esc_html_e($link_tpl . $pagination_last); ?>"><?php _e($pagination_last + 1); ?></a><?php
+                        href="<?php esc_html_e($link_tpl . $pagination_last); ?>"><?php esc_html_e($pagination_last + 1); ?></a><?php
                 }
             }
             ?>

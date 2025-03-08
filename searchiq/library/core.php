@@ -300,6 +300,13 @@ class siq_core{
 										'product_cat' => 'categories',
 										'product_tag' => 'tags'
 										);
+	public $menuSearchBoxDirection;
+	public $excludeCustomFields;
+	public $excludePostIds;
+	public $blackListUrls;
+	public $excludeCustomTaxonomies;
+	public $fieldForExcerpt;
+	public $baseFolder;
 	function __construct(){
 
 		$this->pluginOptions = array(

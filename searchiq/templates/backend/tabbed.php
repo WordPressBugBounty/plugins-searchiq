@@ -42,29 +42,29 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
 	<div class="tabsHeading">
 		<ul>
 			<li id="tab-1" class="<?php esc_html_e( $tab1Selected );?>">
-				<a href="<?php _e( add_query_arg("tab", "tab-1", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) );; ?>">Configuration</a>
+				<a href="<?php esc_html_e( add_query_arg("tab", "tab-1", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) );; ?>">Configuration</a>
 			</li>
 			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-2" );?>" class="<?php esc_html_e( $tab2Selected );?>">
-				<a href="<?php _e( add_query_arg("tab", "tab-2", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Options</a>
+				<a href="<?php esc_html_e( add_query_arg("tab", "tab-2", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Options</a>
 			</li>
 			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-3" );?>" class="<?php esc_html_e( $tab3Selected );?>">
-				<a href="<?php _e( add_query_arg("tab", "tab-3", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Results Page</a>
+				<a href="<?php esc_html_e( add_query_arg("tab", "tab-3", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Results Page</a>
 			</li>
 			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-4" );?>" class="<?php esc_html_e( $tab4Selected );?>">
-				<a href="<?php _e( add_query_arg("tab", "tab-4", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Autocomplete</a>
+				<a href="<?php esc_html_e( add_query_arg("tab", "tab-4", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Autocomplete</a>
 			</li>
 			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-5" );?>" class="<?php esc_html_e( $tab5Selected );?>">
-				<a href="<?php _e( add_query_arg("tab", "tab-5", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Mobile</a>
+				<a href="<?php esc_html_e( add_query_arg("tab", "tab-5", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Mobile</a>
 			</li>
             <?php
             if (isset($this->pluginSettings["facets_enabled"]) && !!$this->pluginSettings["facets_enabled"]) {
-            	_e( wp_kses( $this->facetsTabHtml("", $tab6Selected, (empty($engineCode) ? "" : "tab-6")), array('li' => array( 'id' => array(), 'class' => array() ), 'a' => array('href'=> array())) ) );
+                echo wp_kses( $this->facetsTabHtml("", $tab6Selected, (empty($engineCode) ? "" : "tab-6")), array('li' => array( 'id' => array(), 'class' => array() ), 'a' => array('href'=> array())) );
             }
 
             // API Error Log
             ?>
             <li id="tab-7" class="<?php esc_html_e( $tab7Selected );?>">
-                <a href="<?php _e (add_query_arg("tab", "tab-7", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Error Log</a>
+                <a href="<?php esc_html_e(add_query_arg("tab", "tab-7", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Error Log</a>
             </li>
             <?php
             ?>
@@ -140,13 +140,13 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
 <script type="text/javascript">
     var adminUrl  		= window.location.href;
     var adminPort 		= '<?php esc_html_e( sanitize_text_field( $_SERVER['SERVER_PORT'] ) ); ?>';
-    var adminAjax 		= '<?php _e( esc_url( admin_url( 'admin-ajax.php' ) ) );?>';
-    var adminBaseUrl 	= '<?php _e( esc_url( admin_url( 'admin.php?page=dwsearch' ) ) );?>';
+    var adminAjax 		= '<?php esc_html_e( esc_url( admin_url( 'admin-ajax.php' ) ) );?>';
+    var adminBaseUrl 	= '<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch' ) ) );?>';
     if(adminUrl.indexOf(adminPort) > -1 && adminAjax.indexOf(adminPort) == -1){
         adminAjax 		= adminAjax.replace(/\/wp-admin/g, ':'+adminPort+'/wp-admin');
         adminBaseUrl 	= adminBaseUrl.replace(/\/wp-admin/g, ':'+adminPort+'/wp-admin');
     }
-    var siq_admin_nonce = "<?php  _e( esc_html( wp_create_nonce( $this->adminNonceString ) ) ); ?>";
+    var siq_admin_nonce = "<?php  esc_html_e( esc_html( wp_create_nonce( $this->adminNonceString ) ) ); ?>";
     var searchEngineText = 'You already have search engines created for this domain. ';
     $jQu	= jQuery;
     $jQu(document).on('click', '.clearColor', function(){

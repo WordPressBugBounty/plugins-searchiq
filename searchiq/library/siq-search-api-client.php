@@ -128,7 +128,7 @@ class siq_search_api_client{
 				if(strpos($msg, "Connection refused") > -1){
 					$msg = "We are experiencing temporary site issues";
 				}
-				throw new Exception($msg , 500 );
+				throw new Exception(esc_html($msg, ) , 500 );
 			}else{
 				$retrieve_response_code 	= wp_remote_retrieve_response_code( $res );
 				$retrieve_response_message 	= wp_remote_retrieve_response_message( $res );
@@ -147,7 +147,7 @@ class siq_search_api_client{
 					}else if($retrieve_response_message !=""){
 						return array( 'response_code' => $retrieve_response_code, 'response_body' => array("success"=>true, "message"=> $retrieve_response_message));
 					}else{
-						throw new Exception( 'Unknown Error', $retrieve_response_code );
+						throw new Exception( esc_html('Unknown Error'), intval($retrieve_response_code) );
 					}
 				} elseif( ! empty( $retrieve_response_message ) ) {
 					$response_body = wp_remote_retrieve_body( $res );
@@ -161,11 +161,11 @@ class siq_search_api_client{
 					}else{
 						$message 	= $retrieve_response_message;
 					}
-					throw new Exception( $message, $retrieve_response_code );
+					throw new Exception( esc_html($message), intval($retrieve_response_code) );
 				} else if($retrieve_response_code == 0 && empty($retrieve_response_message)){
-					throw new Exception( 'Unable to connect to server, please check your network', $retrieve_response_code );
+					throw new Exception( esc_html('Unable to connect to server, please check your network'), intval($retrieve_response_code) );
 				}else{
-					throw new Exception( 'Unknown Error', $retrieve_response_code );
+					throw new Exception( esc_html('Unknown Error'), intval($retrieve_response_code) );
 				}
 			}
 		}

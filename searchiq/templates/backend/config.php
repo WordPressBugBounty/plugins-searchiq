@@ -37,9 +37,9 @@ $class_partner = $disable_sync ? $class_partner . " show" : $class_partner;
 ?>
 
 <div class="wsplugin">
-	<h2>SearchIQ: Configuration <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php _e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php _e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ) ); ?>"> User Guide</a></h2>
+	<h2>SearchIQ: Configuration <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ) ); ?>"> User Guide</a></h2>
 	<?php if($code == ""){ ?>
-		<div class="dwAdminHeading">Get your API key from <a target="_blank" href="<?php _e( esc_url( $this->administerPanelLink ) ); ?>">SearchIQ</a> account.</div>
+		<div class="dwAdminHeading">Get your API key from <a target="_blank" href="<?php esc_html_e( esc_url( $this->administerPanelLink ) ); ?>">SearchIQ</a> account.</div>
 	<?php } ?>
 	<?php if($code != "" || $engine !="" || $indexed != ""){ ?>
 		<div class="section section-top">
@@ -57,11 +57,11 @@ $class_partner = $disable_sync ? $class_partner . " show" : $class_partner;
 					</li>
 					<?php if($is_partner): ?>
 						<li class="ename">
-							<label><?php esc_html_e( $this->labels["engineName"] );?></label> <span class="info"><?php _e( wp_kses( $this->generatePartnerDomainSelectBox($domain_list, $engineCode ), $this->kses_allowed_html_config) ); ?></span>
+							<label><?php esc_html_e( $this->labels["engineName"] );?></label> <span class="info"><?php echo wp_kses($this->generatePartnerDomainSelectBox($domain_list, $engineCode ), $this->kses_allowed_html_config); ?></span>
 						</li>
 					<?php endif; ?>
 					<?php if($is_partner) : ?>
-						<?php _e(wp_kses($this->generatePartnerContainerTagHtml(), $this->kses_allowed_html_config)); ?>
+						<?php echo wp_kses($this->generatePartnerContainerTagHtml(), $this->kses_allowed_html_config); ?>
 					<?php endif; ?>
 				</ul>
 
@@ -92,10 +92,10 @@ $class_partner = $disable_sync ? $class_partner . " show" : $class_partner;
 	<div class="section section-3 <?php esc_html_e( $classVerify );?> <?php esc_html_e( $classIndexed );?> <?php esc_html_e( $engineCreated );?> <?php esc_html_e( $classReindex );?> <?php esc_html_e( $class_partner) ?>">
 		<h2><?php esc_html_e( $textStep3 );?></h2>
 		<div class="data">
-			<?php _e( wp_kses( $this->getFilterAndPostTypeHTML(), $this->kses_allowed_html_config ) ); ?>
+			<?php echo wp_kses( $this->getFilterAndPostTypeHTML(), $this->kses_allowed_html_config ) ; ?>
 			<?php 
 				if(  isset($settings["index_posts"]) && is_null($settings["index_posts"]) || empty($settings["index_posts"]) || $settings["index_posts"] == 0 || !empty($settings['siq_engine_not_found']) ){ 
-					_e( wp_kses( $this->getResyncBlock($textIndexing, $textMessageStep3, (isset($settings["index_posts"]) && $settings["index_posts"] && empty($settings['siq_engine_not_found'])) ? 1: 0, $disable_sync ), $this->kses_allowed_html_config ) );
+					echo wp_kses( $this->getResyncBlock($textIndexing, $textMessageStep3, (isset($settings["index_posts"]) && $settings["index_posts"] && empty($settings['siq_engine_not_found'])) ? 1: 0, $disable_sync ), $this->kses_allowed_html_config );
 				} 
 			?>
 		</div>
@@ -106,7 +106,7 @@ $class_partner = $disable_sync ? $class_partner . " show" : $class_partner;
 	<?php if(isset($settings["index_posts"]) && $settings["index_posts"] >= 1 &&  empty($showEngineButton)){ ?>
 		<div class="section section-3-1">
 			<div class="data">
-				<?php _e( wp_kses( $this->getResyncBlock($textIndexing, $textMessageStep3, $settings["index_posts"]), $this->kses_allowed_html_config ) ); ?>
+				<?php echo wp_kses( $this->getResyncBlock($textIndexing, $textMessageStep3, $settings["index_posts"]), $this->kses_allowed_html_config ); ?>
 			</div>
 		</div>
 	<?php } ?>
@@ -136,7 +136,7 @@ $class_partner = $disable_sync ? $class_partner . " show" : $class_partner;
 			</div>
 		<?php 
 			} else { 
-				_e( wp_kses( $this->thumbServiceDisabledMsg, $this->kses_allowed_html_config ) ); 
+				echo wp_kses( $this->thumbServiceDisabledMsg, $this->kses_allowed_html_config ); 
 			} 
 		?>
 	</div>
