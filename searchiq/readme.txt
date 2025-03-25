@@ -1,10 +1,10 @@
 === SearchIQ - The Search Solution  ===
 Contributors: searchiq, igorbelykh86, saurabhjaluka, findmsharma
-Tags: Search,Site Search, Better search, Autocomplete, Ajax search, Analytics ,Custom Search,Search Engine ,Relevant search ,Highlight terms , Category tag author search, searchIQ
-Donate link: http://www.searchiq.co/
+Tags: Search, Site Search, Better search, Autocomplete, Ajax search
+Donate link: https://searchiq.com
 Requires at least: 3.7
-Tested up to: 6.7.1
-Stable tag: 4.8
+Tested up to: 6.7.2
+Stable tag: 5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,7 @@ SearchIQ is absolutely free to get started with.   For businesses in need of adv
 
 ## More Information
 
-Visit [http://www.SearchIQ.co](http://www.SearchIQ.co) or contact us at contact@searchiq.co
+Visit [https://searchiq.com](https://searchiq.com) or contact us at contact@searchiq.co
 
 == Installation ==
 
@@ -74,6 +74,11 @@ If you face an issue and need help, just send us an email to support@searchiq.co
 2. SearchIQ facet feature sample
 
 == Changelog ==
+= 5.0 =
+* Rebranded the plugin as per SearchIQ's latest branding
+* Cleaned up the code and updated plugin based on latest Wordpress Standards
+* Scanned plugin using Wordpress recommends tools like Wordpress "Plugin Check" plugin & PHP Code Sniffer Wordpress Standards
+
 = 4.8 =
 * Added fixes for vulnerability report related to shortcode
 

@@ -3,21 +3,21 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer($this->updateOptionsNonce)){
 	$this->getPluginSettings();
-	$siq_use_custom_search			=	!empty($_POST['siq_use_custom_search']) ? sanitize_text_field($_POST['siq_use_custom_search']) : "";
-	$siq_custom_search_page			=	sanitize_text_field($_POST['siq_custom_search_page']);
-	$siq_enable_autocomplete		=	!empty($_POST['siq_enable_autocomplete']) ? sanitize_text_field($_POST['siq_enable_autocomplete']) : "";
-	$siq_searchbox_name             =   sanitize_text_field($_POST['siq_searchbox_name']);
-	$siq_search_query_param_name = sanitize_text_field($_POST['siq_search_query_param_name']);
-	$siq_menu_select_box = sanitize_text_field($_POST['siq_menu_select_box']);
-	$siq_menu_select_box_color = sanitize_text_field($_POST['siq_menu_select_box_color']);
-	$siq_menu_select_box_pos_right = intval(sanitize_text_field($_POST['siq_menu_select_box_pos_right']));
-	$siq_menu_select_box_pos_top = intval(sanitize_text_field($_POST['siq_menu_select_box_pos_top']));
-	$siq_menu_select_box_pos_absolute = !empty($_POST['siq_menu_select_box_pos_absolute']) ? sanitize_text_field($_POST['siq_menu_select_box_pos_absolute']) : "";
-	$siq_menu_select_box_direction = sanitize_text_field($_POST['siq_menu_select_box_direction']);
-	$siq_search_sortby		= sanitize_text_field($_POST['siq_search_sortby']);
-	$siq_default_thumbnail = sanitize_text_field($_POST['siq_default_thumbnail']);
-	$forceLoadSettings = !empty($_POST['siq_forceLoadSettings']) ? sanitize_text_field($_POST['siq_forceLoadSettings']) : '';
-	$siq_wc_hide_out_of_stock_in_search  = !empty($_POST['siq_wc_hide_out_of_stock_in_search']) ? sanitize_text_field($_POST['siq_wc_hide_out_of_stock_in_search']) : "";
+	$siq_use_custom_search			=	!empty($_POST['siq_use_custom_search']) ? sanitize_text_field(wp_unslash($_POST['siq_use_custom_search'])) : "";
+	$siq_custom_search_page			=	!empty($_POST['siq_custom_search_page']) ? sanitize_text_field(wp_unslash($_POST['siq_custom_search_page'])): "";
+	$siq_enable_autocomplete		=	!empty($_POST['siq_enable_autocomplete']) ? sanitize_text_field(wp_unslash($_POST['siq_enable_autocomplete'])) : "";
+	$siq_searchbox_name             =   !empty($_POST['siq_searchbox_name']) ? sanitize_text_field(wp_unslash($_POST['siq_searchbox_name'])): "";
+	$siq_search_query_param_name = !empty($_POST['siq_search_query_param_name']) ? sanitize_text_field(wp_unslash($_POST['siq_search_query_param_name'])): "";
+	$siq_menu_select_box = !empty($_POST['siq_menu_select_box']) ? sanitize_text_field(wp_unslash($_POST['siq_menu_select_box'])): "";
+	$siq_menu_select_box_color = !empty($_POST['siq_menu_select_box_color']) ? sanitize_text_field(wp_unslash($_POST['siq_menu_select_box_color'])): "";
+	$siq_menu_select_box_pos_right = !empty($_POST['siq_menu_select_box_pos_right']) ? intval(sanitize_text_field(wp_unslash($_POST['siq_menu_select_box_pos_right']))):"";
+	$siq_menu_select_box_pos_top = !empty($_POST['siq_menu_select_box_pos_top']) ? intval(sanitize_text_field(wp_unslash($_POST['siq_menu_select_box_pos_top']))):"";
+	$siq_menu_select_box_pos_absolute = !empty($_POST['siq_menu_select_box_pos_absolute']) ? sanitize_text_field(wp_unslash($_POST['siq_menu_select_box_pos_absolute'])) : "";
+	$siq_menu_select_box_direction = !empty($_POST['siq_menu_select_box_direction']) ? sanitize_text_field(wp_unslash($_POST['siq_menu_select_box_direction'])): "";
+	$siq_search_sortby		= !empty($_POST['siq_search_sortby']) ? sanitize_text_field(wp_unslash($_POST['siq_search_sortby'])): "";
+	$siq_default_thumbnail = !empty($_POST['siq_default_thumbnail']) ? sanitize_text_field(wp_unslash($_POST['siq_default_thumbnail'])): "";
+	$forceLoadSettings = !empty($_POST['siq_forceLoadSettings']) ? sanitize_text_field(wp_unslash($_POST['siq_forceLoadSettings'])) : '';
+	$siq_wc_hide_out_of_stock_in_search  = !empty($_POST['siq_wc_hide_out_of_stock_in_search']) ? sanitize_text_field(wp_unslash($_POST['siq_wc_hide_out_of_stock_in_search'])) : "";
 	
 	// update search query param name
 	if (empty($siq_search_query_param_name) || $siq_search_query_param_name === $this->search_query_param_name) {
@@ -26,14 +26,14 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
 		update_option($this->pluginOptions['search_query_param_name'], $siq_search_query_param_name);
 	}
 
-	$this->setSearchAlgorithm(sanitize_text_field($_POST['siq_search_algorithm']), false);
+	$this->setSearchAlgorithm(!empty($_POST['siq_search_algorithm']) ? sanitize_text_field(wp_unslash($_POST['siq_search_algorithm'])) : siq_core::DEFAULT_SEARCH_ALGORITHM, false);
 
 	// update custom css
 	$settings 					= $this->getPluginSettings();
 	$stylingVar					= $settings['custom_search_page_style'];
 	$styling					= $this->getStyling($stylingVar);
 
-	$styling['customCss']       = function_exists('sanitize_textarea_field') ? sanitize_textarea_field($_POST["stylingCustomCss"]): sanitize_text_field($_POST["stylingCustomCss"]);
+	$styling['customCss']       = !empty($_POST["stylingCustomCss"]) ? (function_exists('sanitize_textarea_field') ? sanitize_textarea_field(wp_unslash($_POST["stylingCustomCss"])): sanitize_text_field(wp_unslash($_POST["stylingCustomCss"]))) : "";
 	update_option($this->pluginOptions['custom_search_page_style'], $styling);
 
 	$siq_invalid_custom_search_page = false;
@@ -140,18 +140,21 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
 		delete_option($this->pluginOptions['siq_wc_hide_out_of_stock_in_search']);
 	}
 
-	$arrSync['openResultInTab'] = isset($_POST['siq_openResultInTab']) && !!$_POST['siq_openResultInTab'];
-	$arrSync['hideLogo'] = (isset($_POST['siq_hideLogo'])) ? !!$_POST['siq_hideLogo'] : 0;
+	$arrSync['openResultInTab'] = isset($_POST['siq_openResultInTab']) && !!sanitize_text_field(wp_unslash($_POST['siq_openResultInTab']));
+	$arrSync['hideLogo'] = (isset($_POST['siq_hideLogo'])) ? !!sanitize_text_field(wp_unslash($_POST['siq_hideLogo'])) : 0;
 	$this->_siq_sync_settings($arrSync);
 	$this->siqSyncSettings['openResultInTab'] = $arrSync['openResultInTab'];
 	$this->siqSyncSettings['hideLogo'] = $arrSync['hideLogo'];
 
-	$siq_posts_per_call = intval(sanitize_text_field($_POST['siq_posts_per_call']));
-	$siq_posts_per_delta_call = intval(sanitize_text_field($_POST['siq_posts_per_delta_call']));
-	$siq_api_call_timeout = intval(sanitize_text_field($_POST['siq_api_call_timeout']));
+	$siq_posts_per_call = !empty($_POST['siq_posts_per_call']) ? intval(sanitize_text_field(wp_unslash($_POST['siq_posts_per_call']))): $this->postsPerCall;
+	$siq_posts_per_delta_call = !empty($_POST['siq_posts_per_delta_call']) ? intval(sanitize_text_field(wp_unslash($_POST['siq_posts_per_delta_call']))) : $this->postsPerCallForDeltaSync;
+	$siq_api_call_timeout = !empty($_POST['siq_api_call_timeout']) ? intval(sanitize_text_field(wp_unslash($_POST['siq_api_call_timeout']))): SIQ_TIMEOUT_SECONDS;
 	$this->setPostsPerCall($siq_posts_per_call);
 	$this->setPostsPerDeltaCall($siq_posts_per_delta_call);
 	$this->setApiCallTimeout($siq_api_call_timeout);
+	add_action('_siq_settings_update_notice', function() {
+		echo '<div class="update-nag siq-notices siq-notice-settings-update notice siq-notice-icon notice-success">Settings updated successfully.</div>';
+	});
 }
 $settings 					= $this->getPluginSettings();
 $use_custom_search			= $settings['use_custom_search'];
@@ -198,22 +201,22 @@ $siq_posts_per_delta_call = $this->getPostsPerDeltaCall();
 $siq_api_call_timeout = $this->getApiCallTimeout();
 ?>
 <div class="wsplugin">
-	<h2>SearchIQ: Plugin options <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
+	<h2>SearchIQ: Plugin options <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php echo esc_url( $this->userGuideLink ) ;?>"><img style="vertical-align:bottom" src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ; //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="user guide"> User Guide</a></h2>
 	<div class="dwAdminHeading">You can set options for the plugin on this page.</div>
-	<form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-2') ) ); ?>" class="custom_page_options" name="custom_options" onSubmit="return checkSiqOptions();">
+	<form method="POST" action="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-options') ); ?>" class="custom_page_options" name="custom_options" onSubmit="return checkSiqOptions();">
 		<div class="section section-1">
 			<h2>General</h2>
 			<div class="data">
 				<label>Use SearchIQ results page</label>
 				<input type="checkbox" name="siq_use_custom_search" value="yes"
 					<?php if(isset($use_custom_search) && ($use_custom_search=='yes')){
-						esc_html_e( "checked ='checked'" );
+						echo esc_html( "checked ='checked'" );
 					}?>
 					/>
 			</div>
 			<div class="data pageList">
 				<label>Result page</label>
-				<input type="text" class="textbox large" value="<?php esc_html_e( $custom_search_page ); ?>" id="siq_custom_search_page" name="siq_custom_search_page"/>
+				<input type="text" class="textbox large" value="<?php echo esc_url( $custom_search_page ); ?>" id="siq_custom_search_page" name="siq_custom_search_page"/>
 				<?php if ($siq_invalid_custom_search_page) { ?>
 					<div class="message error">Selected page doesn't have [siq_ajax_search] tag</div>
 				<?php } ?>
@@ -223,7 +226,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<label>Open results in new page</label>
 				<input type="checkbox" name="siq_openResultInTab" value="true"
 					<?php if(isset($openResultInTab) && ($openResultInTab== true)){
-						esc_html_e( "checked ='checked'" );
+						echo esc_html( "checked ='checked'" );
 					}?>
 					/>
 			</div>
@@ -231,7 +234,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<label>Default thumbnail url<br/>
 					<small>Url entered here will be used as default thumbnail(in case post thumbnail does not exist) for the search results from SearchIQ.<br/>
 						Enter image url  in the text box directly or click on <b>"Select/Upload Thumbnail"</b> button to select image from wordpress media</small></label>
-				<input type="text" name="siq_default_thumbnail" class="textbox large"  value="<?php esc_html_e( esc_url( $defaultThumbnail ) );?>"/>
+				<input type="text" name="siq_default_thumbnail" class="textbox large"  value="<?php echo esc_url( $defaultThumbnail );?>"/>
 				<input type="button" id="siq_default_thumbnail_uploader" class="btn" value="Select/Upload Thumbnail" />
 			</div>
 			<?php if($this->allowHideLogo){ ?>
@@ -239,7 +242,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<label>Hide SearchIQ logo</label>
 					<input type="checkbox" name="siq_hideLogo" value="true"
 						<?php if(isset($hideLogo) && ($hideLogo == true)){
-							esc_html_e( "checked ='checked'" );
+							echo esc_html( "checked ='checked'" );
 						}?>
 						/>
 				</div>
@@ -248,21 +251,21 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<label>Force Load settings and autocomplete JS</label>
 				<input type="checkbox" name="siq_forceLoadSettings" value="true"
 					<?php if(isset($forceLoadSettings) && ($forceLoadSettings == true)){
-						esc_html_e( "checked ='checked'" );
+						echo esc_html( "checked ='checked'" );
 					}?>
 					/>
 			</div>
 			<h2>Autocomplete</h2>
 			<div class="data">
 				<label>Enable autocomplete</label>
-				<input type="checkbox" name="siq_enable_autocomplete" id="siq_enable_autocomplete" value="yes" <?php esc_html_e( ($siq_enable_autocomplete == "yes" ? "checked=checked" : "") );?>/>
+				<input type="checkbox" name="siq_enable_autocomplete" id="siq_enable_autocomplete" value="yes" <?php echo esc_html( ($siq_enable_autocomplete == "yes" ? "checked=checked" : "") );?>/>
 			</div>
 			<div class="data">
 				<label>Search box name<br/>
 					<small>
 						No special characters except `-` or `_` allowed in this field. Any other special characters will be removed automatically.
 					</small></label>
-				<input type="text" name="siq_searchbox_name" id="siq_searchbox_name" value="<?php esc_html_e( $this->getSearchboxName() );?>"/>
+				<input type="text" name="siq_searchbox_name" id="siq_searchbox_name" value="<?php echo esc_html( $this->getSearchboxName() );?>"/>
 			</div>
 
 			<h2>Search</h2>
@@ -274,7 +277,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 						<span>It cannot be `s` as this parameter is reserved by wordpress built-in search functionality</span></small>
 				</label>
 				<div class="inlineRight">
-					<input type="text" name="siq_search_query_param_name" id="siq_search_query_param_name" value="<?php esc_html_e( $this->getSearchQueryParamName() );?>"/>
+					<input type="text" name="siq_search_query_param_name" id="siq_search_query_param_name" value="<?php echo esc_attr( $this->getSearchQueryParamName() );?>"/>
 				</div>
 			</div>
 
@@ -282,16 +285,16 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<label>Search algorithm</label>
 				<select id="search-algorithm" name="siq_search_algorithm">
 					<?php $searchAlgo = $this->getSearchAlgorithm(); ?>
-					<option value="BROAD_MATCH" <?php esc_html_e( $searchAlgo == "BROAD_MATCH" ? "selected" : "" );?>>Broad match</option>
-					<option value="EXACT_MATCH" <?php esc_html_e( $searchAlgo == "EXACT_MATCH" ? "selected" : "" );?>>Exact match</option>
-					<option value="ALL_TERM_MATCH" <?php esc_html_e( $searchAlgo == "ALL_TERM_MATCH" ? "selected" : "" );?>>All term match</option>
+					<option value="BROAD_MATCH" <?php echo esc_attr( $searchAlgo == "BROAD_MATCH" ? "selected" : "" );?>>Broad match</option>
+					<option value="EXACT_MATCH" <?php echo esc_attr( $searchAlgo == "EXACT_MATCH" ? "selected" : "" );?>>Exact match</option>
+					<option value="ALL_TERM_MATCH" <?php echo esc_attr( $searchAlgo == "ALL_TERM_MATCH" ? "selected" : "" );?>>All term match</option>
 				</select>
 			</div>
 			<div class="data">
 				<label>Sort By</label>
 				<select id="search-sort-by" name="siq_search_sortby">
-					<option value="RELEVANCE" <?php esc_html_e( $sortBy == "RELEVANCE" ? "selected" : "" );?>>Relevance</option>
-					<option value="NEWEST" <?php esc_html_e( $sortBy == "NEWEST" ? "selected" : "" );?>>Newest</option>
+					<option value="RELEVANCE" <?php echo esc_attr( $sortBy == "RELEVANCE" ? "selected" : "" );?>>Relevance</option>
+					<option value="NEWEST" <?php echo esc_attr( $sortBy == "NEWEST" ? "selected" : "" );?>>Newest</option>
 				</select>
 			</div>
 			<h2>Add search to your site</h2>
@@ -300,15 +303,15 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<div class="">SearchIQ searchbox shortcode can be used on all pages, posts and sidebars</div><br/>
 				<code>[siq_searchbox type="search-bar" placeholder="Search here" post-types="post,page" width="500" placement="left"]</code><br/>
 				<div class="">In the shortcode all the fields i.e. type, placeholder, post-types, width and placement are optional.</div><br/>
-				<div class="">More information on the shortcode options can be found <a href="<?php esc_html_e( esc_url( $this->userGuideLink.'#guide-shortcode' ) ); ?>" target="_blank">here</a></div><br/>
+				<div class="">More information on the shortcode options can be found <a href="<?php echo esc_url( $this->userGuideLink.'#guide-shortcode' ); ?>" target="_blank">here</a></div><br/>
 			</div>
 			<h3><b>Using Widget</b></h3>
 			<div class="data">
-				<div>Searchiq search widget is availabe on widgets screen which can be reached from <a href="<?php esc_html_e( esc_url( get_admin_url().'widgets.php' ) ); ?>"><b>here</b></a>
+				<div>Searchiq search widget is availabe on widgets screen which can be reached from <a href="<?php echo esc_url( get_admin_url().'widgets.php' ); ?>"><b>here</b></a>
 					<br/>See image below
 				</div><br/>
 				<div class="helpWrap">
-					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-box-widget.png' ) ); ?>" />
+					<img src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-box-widget.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="search box widget" />
 				</div>
 			</div>
 			<h3><b>Using Icon in menu</b></h3>
@@ -319,7 +322,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				</label>
 				<?php echo wp_kses( $this->getMenuLocationSelectBox('siq_menu_select_box', $siq_menu_selected), $this->kses_allowed_html_searchbox );?>
 				<div class="helpWrap">
-					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-1.png' ) ); ?>" />
+					<img src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-1.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="search icon" />
 				</div>
 			</div>
 			<div class="data">
@@ -327,10 +330,10 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<small>Selecting this will move searchicon to extreme right of menu. See image below</small>
 				</label>
 				<div class="inlineRight">
-					<input type="checkbox" name="siq_menu_select_box_pos_absolute" id="siq_menu_select_box_pos_absolute" <?php esc_html_e( ($siq_menu_select_box_pos_absolute == 'yes')? "checked=checked": "" );?> value="yes"/>
+					<input type="checkbox" name="siq_menu_select_box_pos_absolute" id="siq_menu_select_box_pos_absolute" <?php echo esc_html( ($siq_menu_select_box_pos_absolute == 'yes')? "checked=checked": "" );?> value="yes"/>
 				</div>
 				<div class="helpWrap">
-					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-extreme-right.png' ) ); ?>" />
+					<img src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-extreme-right.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="search icon right" />
 				</div>
 			</div>
 			<div class="data">
@@ -340,13 +343,13 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 				<select name="siq_menu_select_box_direction" id="siq_menu_select_box_direction">
 					<?php foreach($this->menuSearchBoxDirection as $k => $v){ ?>
 						<?php $varSelected = ($siq_menu_select_box_direction != "" && $siq_menu_select_box_direction == $k) ? "selected='selected'": "" ;?>
-						<option <?php esc_html_e( $varSelected );?> value="<?php esc_html_e( $k ); ?>"><?php esc_html_e( $v );?></option>
+						<option <?php echo esc_html( $varSelected );?> value="<?php echo esc_attr( $k ); ?>"><?php echo esc_attr( $v );?></option>
 					<?php } ?>
 				</select>
 			</div>
 			<div class="data">
 				<label>Search icon color</label>
-				<input value="<?php esc_html_e( $siq_menu_select_box_color ); ?>" name="siq_menu_select_box_color" class="color"/>
+				<input value="<?php echo esc_attr( $siq_menu_select_box_color ); ?>" name="siq_menu_select_box_color" class="color"/>
 				<div class="clearColor"><span></span></div>
 			</div>
 			<div class="data">
@@ -354,10 +357,10 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<small>Position of search icon from right. Can be negative also. See image below</small>
 				</label>
 				<div class="inlineRight">
-					<input type="text" name="siq_menu_select_box_pos_right" id="siq_menu_select_box_pos_right" class="textbox small" value="<?php esc_html_e( $siq_menu_select_box_pos_right );?>"/>px
+					<input type="text" name="siq_menu_select_box_pos_right" id="siq_menu_select_box_pos_right" class="textbox small" value="<?php echo esc_attr( $siq_menu_select_box_pos_right );?>"/>px
 				</div>
 				<div class="helpWrap">
-					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-right.png' ) ); ?>" />
+					<img src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-right.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="search icon from right" />
 				</div>
 			</div>
 			<div class="data">
@@ -365,17 +368,17 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 					<small>Position of search icon from top. Can be negative also. See image below</small>
 				</label>
 				<div class="inlineRight">
-					<input type="text" name="siq_menu_select_box_pos_top" id="siq_menu_select_box_pos_top" class="textbox small" value="<?php esc_html_e( $siq_menu_select_box_pos_top );?>"/>px
+					<input type="text" name="siq_menu_select_box_pos_top" id="siq_menu_select_box_pos_top" class="textbox small" value="<?php echo esc_attr( $siq_menu_select_box_pos_top );?>"/>px
 				</div>
 				<div class="helpWrap">
-					<img src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-top.png' ) ); ?>" />
+					<img src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/search-icon-top.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="search icon top" />
 				</div>
 			</div>
 			<?php if($this->woocommerceActive){ ?> 
 			<h2>Woocommerce</h2>
 			<div class="data">
 					<label>Hide out of stock products in search results</label>
-				<input type="checkbox" name="siq_wc_hide_out_of_stock_in_search" id="siq_wc_hide_out_of_stock_in_search" value="yes" <?php esc_html_e( ($siq_wc_hide_out_of_stock_in_search == "yes" ? "checked=checked" : "" ) );?>/>
+				<input type="checkbox" name="siq_wc_hide_out_of_stock_in_search" id="siq_wc_hide_out_of_stock_in_search" value="yes" <?php echo esc_html( ($siq_wc_hide_out_of_stock_in_search == "yes" ? "checked=checked" : "" ) );?>/>
 				 </span>
 			</div>
 			<?php } ?>
@@ -383,7 +386,7 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 			<div class="data">
 				<label>Add your custom CSS here</label>
 			 <span style="display: inline-block;">
-				 <textarea id="customCssTextarea" name="stylingCustomCss" style="background-color:#fff!important; width:400px; height:300px;"><?php esc_html_e( $styling['customCss'] ); ?></textarea>
+				 <textarea id="customCssTextarea" name="stylingCustomCss" style="background-color:#fff!important; width:400px; height:300px;"><?php echo esc_textarea( stripslashes($styling['customCss']) ); ?></textarea>
 				 <i>Add your custom css in this box without &lt;style&gt; tag</i><br/>
 			 </span>
 			</div>
@@ -392,22 +395,22 @@ $siq_api_call_timeout = $this->getApiCallTimeout();
 			<h2>Error Log</h2>
 			<div class="data">
 				<label>Enable</label>
-				<input type="checkbox" name="enable_api_error_log" value="1" <?php esc_html_e($api_error_log_enabled ? 'checked="checked"' : '');?> />
+				<input type="checkbox" name="enable_api_error_log" value="1" <?php echo esc_html($api_error_log_enabled ? 'checked="checked"' : '');?> />
 			</div>
 		</div>
 		<div class="section section-2">
 			<h2>SearchIQ API Call Settings</h2>
 			<div class="data">
 				<label>Number of posts per call</label>
-				<input type="number" name="siq_posts_per_call" value="<?php esc_html_e($siq_posts_per_call);?>" />
+				<input type="number" name="siq_posts_per_call" value="<?php echo esc_attr(intval($siq_posts_per_call));?>" />
 			</div>
 			<div class="data">
 				<label>Number of posts per delta call</label>
-				<input type="number" name="siq_posts_per_delta_call" value="<?php esc_html_e($siq_posts_per_delta_call);?>" />
+				<input type="number" name="siq_posts_per_delta_call" value="<?php echo esc_attr(intval($siq_posts_per_delta_call));?>" />
 			</div>
 			<div class="data">
 				<label>API call timeout</label>
-				<input type="number" name="siq_api_call_timeout" value="<?php esc_html_e($siq_api_call_timeout);?>" /> sec
+				<input type="number" name="siq_api_call_timeout" value="<?php echo esc_attr(intval($siq_api_call_timeout));?>" /> sec
 			</div>
 		</div>
 		<div class="section submit">

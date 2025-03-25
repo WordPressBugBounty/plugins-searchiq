@@ -2,46 +2,53 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if(!empty( $_POST ) && isset($_POST['btnSubmitAutocompleteStyleOptions']) && check_admin_referer($this->updateAutocompleteNonce)){
-		$siq_styling						= array_map('sanitize_text_field', $_POST['styling'] );
-		$siq_styling_						= array();
-		if(count($siq_styling) > 0){
-			foreach($siq_styling as $k => $v){
-				$siq_styling_[$k] = sanitize_text_field($v);
-				if ($k == "autocompleteWidth" && $siq_styling_[$k] != "auto" && intval($siq_styling_[$k]) <= 0) {
-					$siq_styling_[$k] = "auto";
-				}
-			}
-		}
-		$error=array();
-        $siq_use_autocomplete_images	=	(!empty($_POST['siq_use_autocomplete_images'])) ? sanitize_text_field($_POST['siq_use_autocomplete_images']): "";
-		if(isset($siq_styling_) && count($siq_styling_) > 0){			
-			update_option($this->pluginOptions['autocomplete_style'], $siq_styling_);
-		}
-
-		if (!empty($_POST['autocompleteNumRecords'])) {
-			$siq_autocompleteNumRecords = sanitize_text_field($_POST['autocompleteNumRecords']);
-			update_option($this->pluginOptions['autocomplete_num_records'], intval($siq_autocompleteNumRecords) > 0 ? $siq_autocompleteNumRecords : $this->autocompleteDefaultNumRecords);
-		}
-                
-        $autocomplete_text_results = trim(sanitize_text_field($_POST['autocomplete_text_results']));
-        if (trim($autocomplete_text_results) == false) $autocomplete_text_results = $this->defaultAutocompleteTextResults;
-        update_option($this->pluginOptions['autocomplete_text_results'], $autocomplete_text_results);
-
-        $autocomplete_text_poweredBy = trim(sanitize_text_field($_POST['autocomplete_text_poweredBy']));
-        if (trim($autocomplete_text_poweredBy) == false) $autocomplete_text_poweredBy = $this->defaultAutocompleteTextPoweredBy;
-        update_option($this->pluginOptions['autocomplete_text_poweredBy'], $autocomplete_text_poweredBy);
-
-        $autocomplete_text_moreLink = trim(sanitize_text_field($_POST['autocomplete_text_moreLink']));
-        if (trim($autocomplete_text_moreLink) == false) $autocomplete_text_moreLink = $this->defaultAutocompleteTextMoreLink;
-        update_option($this->pluginOptions['autocomplete_text_moreLink'], $autocomplete_text_moreLink);
-
-        if($siq_use_autocomplete_images !=""){
-            update_option($this->pluginOptions['show_autocomplete_images'],$siq_use_autocomplete_images);
-        }else{
-            delete_option($this->pluginOptions['show_autocomplete_images']);
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+    $siq_styling = array_map('sanitize_text_field', $_POST['styling']);
+    $siq_styling_ = array();
+    if (count($siq_styling) > 0) {
+        foreach ($siq_styling as $k => $v) {
+            $siq_styling_[$k] = sanitize_text_field($v);
+            if ($k == "autocompleteWidth" && $siq_styling_[$k] != "auto" && intval($siq_styling_[$k]) <= 0) {
+                $siq_styling_[$k] = "auto";
+            }
         }
-		
-        $this->_siq_sync_settings();
+    }
+    $error = array();
+    $siq_use_autocomplete_images = (!empty($_POST['siq_use_autocomplete_images'])) ? sanitize_text_field(wp_unslash($_POST['siq_use_autocomplete_images'])) : "";
+    if (isset($siq_styling_) && count($siq_styling_) > 0) {
+        update_option($this->pluginOptions['autocomplete_style'], $siq_styling_);
+    }
+
+    if (!empty($_POST['autocompleteNumRecords'])) {
+        $siq_autocompleteNumRecords = sanitize_text_field(wp_unslash($_POST['autocompleteNumRecords']));
+        update_option($this->pluginOptions['autocomplete_num_records'], intval($siq_autocompleteNumRecords) > 0 ? $siq_autocompleteNumRecords : $this->autocompleteDefaultNumRecords);
+    }
+
+    $autocomplete_text_results = isset($_POST['autocomplete_text_results']) ? trim(sanitize_text_field(wp_unslash( $_POST['autocomplete_text_results']))) : '';
+    if (trim($autocomplete_text_results) == false)
+        $autocomplete_text_results = $this->defaultAutocompleteTextResults;
+    update_option($this->pluginOptions['autocomplete_text_results'], $autocomplete_text_results);
+
+    $autocomplete_text_poweredBy = isset($_POST['autocomplete_text_poweredBy']) ? trim(sanitize_text_field(wp_unslash($_POST['autocomplete_text_poweredBy']))) : '';
+    if (trim($autocomplete_text_poweredBy) == false)
+        $autocomplete_text_poweredBy = $this->defaultAutocompleteTextPoweredBy;
+    update_option($this->pluginOptions['autocomplete_text_poweredBy'], $autocomplete_text_poweredBy);
+
+    $autocomplete_text_moreLink = isset($_POST['autocomplete_text_moreLink']) ? trim(sanitize_text_field(wp_unslash($_POST['autocomplete_text_moreLink']))) : '';
+    if (trim($autocomplete_text_moreLink) == false)
+        $autocomplete_text_moreLink = $this->defaultAutocompleteTextMoreLink;
+    update_option($this->pluginOptions['autocomplete_text_moreLink'], $autocomplete_text_moreLink);
+
+    if ($siq_use_autocomplete_images != "") {
+        update_option($this->pluginOptions['show_autocomplete_images'], $siq_use_autocomplete_images);
+    } else {
+        delete_option($this->pluginOptions['show_autocomplete_images']);
+    }
+
+    $this->_siq_sync_settings();
+    add_action('_siq_settings_update_notice', function () {
+        echo '<div class="update-nag siq-notices siq-notice-settings-update notice siq-notice-icon notice-success">Settings updated successfully.</div>';
+    });
 	
 }
 
@@ -52,63 +59,63 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 
  ?>
 <div class="wsplugin">
- <h2>SearchIQ: Autocomplete <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png') ); ?>"> User Guide</a></h2>
+ <h2>SearchIQ: Autocomplete <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php echo esc_url($this->userGuideLink); ?>"><img style="vertical-align:bottom" src="<?php echo esc_url(SIQ_BASE_URL . '/assets/' . SIQ_PLUGIN_VERSION . '/images/help/help-icon.png'); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="user guide"> User Guide</a></h2>
  <div class="dwAdminHeading">You can change appearance of autocomplete here. You can use the textbox on right to see the results.</div>
- <form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-4') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-autocomplete-form" name="custom_options">
+ <form method="POST" action="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-autocomplete-config') ); ?>" class="custom_page_options siq-styling-form" id="siq-autocomplete-form" name="custom_options">
 	<div class="section section-1">
 		<h2>Autocomplete block</h2>
 			<div class="data">
 				<label>Show images in autocomplete search results</label>
 				<input type="checkbox" name="siq_use_autocomplete_images" id="siq_use_autocomplete_images" value="yes"
 					<?php if(isset($siq_use_autocomplete_images) && ($siq_use_autocomplete_images=='yes')){
-						esc_html_e( "checked ='checked'" );
+						echo esc_html( "checked ='checked'" );
 					}?>
 				/>
 			</div>
                 <div class="data">
                     <label>Header for “Result” section</label>
-                    <input value="<?php esc_html_e( trim($this->pluginSettings["autocomplete_text_results"]) ? $this->pluginSettings["autocomplete_text_results"] : $this->defaultAutocompleteTextResults ) ;?>" name="autocomplete_text_results"/>
+                    <input value="<?php echo esc_attr(stripslashes( isset($this->pluginSettings["autocomplete_text_results"]) && trim($this->pluginSettings["autocomplete_text_results"]) ? $this->pluginSettings["autocomplete_text_results"] : $this->defaultAutocompleteTextResults )) ;?>" name="autocomplete_text_results"/>
                 </div>
                 <div class="data">
                     <label>
                         Footer “Show all # results” link text<br/>
                         <small>Use # to include number of results</small>
                     </label>
-                    <input value="<?php esc_html_e( trim($this->pluginSettings["autocomplete_text_moreLink"]) ? $this->pluginSettings["autocomplete_text_moreLink"] : $this->defaultAutocompleteTextMoreLink ) ;?>" name="autocomplete_text_moreLink"/>
+                    <input value="<?php echo esc_attr(stripslashes(isset($this->pluginSettings["autocomplete_text_moreLink"]) && trim($this->pluginSettings["autocomplete_text_moreLink"]) ? $this->pluginSettings["autocomplete_text_moreLink"] : $this->defaultAutocompleteTextMoreLink )) ;?>" name="autocomplete_text_moreLink"/>
                 </div>
                 <div class="data">
                     <label>Header “Powered by” text</label>
-                    <input value="<?php esc_html_e( trim($this->pluginSettings["autocomplete_text_poweredBy"]) ? $this->pluginSettings["autocomplete_text_poweredBy"] : $this->defaultAutocompleteTextPoweredBy );?>" name="autocomplete_text_poweredBy"/>
+                    <input value="<?php echo esc_attr(stripslashes(isset($this->pluginSettings["autocomplete_text_poweredBy"]) && trim($this->pluginSettings["autocomplete_text_poweredBy"]) ? $this->pluginSettings["autocomplete_text_poweredBy"] : $this->defaultAutocompleteTextPoweredBy ));?>" name="autocomplete_text_poweredBy"/>
                 </div>
 		<div class="data">
 			<label>Number of records</label>
-			<input value="<?php esc_html_e( $this->getAutocompleteNumRecords() );?>" name="autocompleteNumRecords"/>
+			<input value="<?php echo esc_attr( intval($this->getAutocompleteNumRecords()) );?>" name="autocompleteNumRecords"/>
 		</div>
 		<div class="data">
 			<label>
 				Autocomplete width<br/>
 				<small>(Keep empty or type &laquo;auto&raquo; to make the width fit search box size)</small>
 			</label>
-			<input value="<?php esc_html_e( $styling['autocompleteWidth'] ) ; ?>" name="styling[autocompleteWidth]"/> px
+			<input value="<?php echo esc_attr( $styling['autocompleteWidth'] ) ; ?>" name="styling[autocompleteWidth]"/> px
 		</div>
 		<div class="data">
 			<label>Background color</label>
-			<input value="<?php esc_html_e( $styling['autocompleteBackground'] ); ?>" name="styling[autocompleteBackground]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['autocompleteBackground'] ); ?>" name="styling[autocompleteBackground]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
 			<label>Section Title Text Color</label>
-			<input value="<?php esc_html_e( $styling['sectionTitleColor'] ); ?>" name="styling[sectionTitleColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['sectionTitleColor'] ); ?>" name="styling[sectionTitleColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
 			<label>More Link Text Color</label>
-			<input value="<?php esc_html_e( $styling['moreLinkColor'] ); ?>" name="styling[moreLinkColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['moreLinkColor'] ); ?>" name="styling[moreLinkColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
 			<label>Hovered More Link Text Color</label>
-			<input value="<?php esc_html_e( $styling['hoverMoreLinkColor'] ); ?>" name="styling[hoverMoreLinkColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['hoverMoreLinkColor'] ); ?>" name="styling[hoverMoreLinkColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -120,7 +127,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		</div>
 		<div class="data">
 			<label>Text Color</label>
-			<input value="<?php esc_html_e( $styling['resultFontColor'] ); ?>" name="styling[resultFontColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultFontColor'] ); ?>" name="styling[resultFontColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
@@ -129,12 +136,12 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		</div>
 		<div class="data">
 			<label>Highlighted text Color</label>
-			<input value="<?php esc_html_e( $styling['highlightFontColor'] ); ?>" name="styling[highlightFontColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['highlightFontColor'] ); ?>" name="styling[highlightFontColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
 			<label>Image Placeholder Background</label>
-			<input value="<?php esc_html_e( $styling['imagePlacehoderBackground'] ); ?>" name="styling[imagePlacehoderBackground]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['imagePlacehoderBackground'] ); ?>" name="styling[imagePlacehoderBackground]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -142,7 +149,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		 <h2>Hovered Item</h2>
 		 <div class="data">
 			 <label>Background color</label>
-			 <input value="<?php esc_html_e( $styling['hoverResultBackground'] ); ?>" name="styling[hoverResultBackground]" class="color"/>
+			 <input value="<?php echo esc_attr( $styling['hoverResultBackground'] ); ?>" name="styling[hoverResultBackground]" class="color"/>
 			 <div class="clearColor"><span></span></div>
 		 </div>
 		 <div class="data">
@@ -151,7 +158,7 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		 </div>
 		 <div class="data">
 			 <label>Text Color</label>
-			 <input value="<?php esc_html_e( $styling['hoverResultFontColor'] ); ?>" name="styling[hoverResultFontColor]" class="color"/>
+			 <input value="<?php echo esc_attr( $styling['hoverResultFontColor'] ); ?>" name="styling[hoverResultFontColor]" class="color"/>
 			 <div class="clearColor"><span></span></div>
 		 </div>
 		 <div class="data">
@@ -160,12 +167,12 @@ $siq_use_autocomplete_images	= $settings['show_autocomplete_images'];
 		 </div>
 		 <div class="data">
 			 <label>Highlighted text Color</label>
-			 <input value="<?php esc_html_e( $styling['hoverHighlightFontColor'] ); ?>" name="styling[hoverHighlightFontColor]" class="color"/>
+			 <input value="<?php echo esc_attr( $styling['hoverHighlightFontColor'] ); ?>" name="styling[hoverHighlightFontColor]" class="color"/>
 			 <div class="clearColor"><span></span></div>
 		 </div>
 		 <div class="data">
 			 <label>Image Placeholder Background</label>
-			 <input value="<?php esc_html_e( $styling['hoverImagePlacehoderBackground'] ); ?>" name="styling[hoverImagePlacehoderBackground]" class="color"/>
+			 <input value="<?php echo esc_attr( $styling['hoverImagePlacehoderBackground'] ); ?>" name="styling[hoverImagePlacehoderBackground]" class="color"/>
 			 <div class="clearColor"><span></span></div>
 		 </div>
 	 </div>

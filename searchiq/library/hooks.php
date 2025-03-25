@@ -59,7 +59,7 @@ class siq_hooks extends siq_core{
 	public function siq_redirect_after_media_save(){
 		 global $pagenow;
 		if ( $pagenow == 'upload.php' ) { // we are on media library page
-			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'bulk-media' ) ){
+			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'bulk-media' ) ){
 				$data = array_map( 'sanitize_text_field', wp_unslash( $_GET ) );
 				if(array_key_exists("found_post_id", $data) && array_key_exists("find-posts-submit", $data) && array_key_exists("media", $data)){
 					$media 	= $data["media"];

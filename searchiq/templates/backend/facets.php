@@ -48,6 +48,9 @@ if ($this->pluginSettings['facets_enabled']) {
         }
 
         $this->_siq_sync_settings();
+        add_action('_siq_settings_update_notice', function () {
+            echo '<div class="update-nag siq-notices siq-notice-settings-update notice siq-notice-icon notice-success">Settings updated successfully.</div>';
+        });
     }else{
         $getNoticeStatus = get_option(self::FACETS_NOTICE_KEY, 0);
         if($getNoticeStatus > 0) {
@@ -70,16 +73,16 @@ if ($this->pluginSettings['facets_enabled']) {
 
 <div class="wsplugin">
     <h2>Facets</h2>
-    <div class="wpAdminHeading">Here you can add facets to display in autocomplete and on result page</div>
-    <form action="<?php echo esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-6') );?>" method="post">
+    <div class="dwAdminHeading">You can configure the facets feature to display in autocomplete search and SearchIQ search result page here.</div>
+    <form action="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-facets-config') );?>" method="post">
         <div class="section section-0">
             <div class="data">
-                <label>Enable facets in autocomplete</label>
-                <input type="checkbox" value="1" name="siq_enable_facets_autocomplete" <?php esc_html_e( $this->getAutocompleteFacetsEnabled() ? "checked" : "" );?> />
+                <label for="siq_enable_facets_autocomplete">Enable facets in autocomplete</label>
+                <input type="checkbox" value="1" name="siq_enable_facets_autocomplete" id="siq_enable_facets_autocomplete" <?php echo esc_html( $this->getAutocompleteFacetsEnabled() ? "checked" : "" );?> />
             </div>
             <div class="data">
-                <label>Enable facets on result page</label>
-                <input type="checkbox" value="1" name="siq_enable_facets_result_page" <?php esc_html_e( $this->getResultPageFacetsEnabled() ? "checked" : "" );?> />
+                <label for="siq_enable_facets_result_page">Enable facets on result page</label>
+                <input type="checkbox" value="1" name="siq_enable_facets_result_page" id="siq_enable_facets_result_page" <?php echo esc_html( $this->getResultPageFacetsEnabled() ? "checked" : "" );?> />
             </div>
 
             <div id="siq-facet-form">
@@ -111,53 +114,53 @@ if ($this->pluginSettings['facets_enabled']) {
                         $correctFacetTargetField = $this->getTargetField($facet['field'], $mapping);
                         $predefinedField = $this->isPredefinedField($facet['field'], $mapping);
                         ?>
-                        <div id="siq-facet-item-<?php esc_html_e( $i );?>" class="siq-facet-item">
+                        <div id="siq-facet-item-<?php echo esc_attr( $i );?>" class="siq-facet-item">
                             <table>
                                 <tr>
                                     <td><label>Label</label></td>
                                     <td>
-                                        <input type="text" name="siqFacetLabel[]" value="<?php esc_html_e( $facet["label"] );?>" required />
+                                        <input type="text" name="siqFacetLabel[]" value="<?php echo esc_attr( $facet["label"] );?>" required />
                                     </td>
                                     <td><label>Post Type</label></td>
                                     <td>
-                                        <select name="siqFacetPostType[]" onchange="SIQ_buildFacetFieldSelectBox(<?php esc_html_e( $i );?>, this);">
+                                        <select name="siqFacetPostType[]" onchange="SIQ_buildFacetFieldSelectBox(<?php echo esc_attr( $i );?>, this);">
                                             <option value="_siq_all_posts">All types</option>
                                             <?php
                                             foreach($postTypes as $postType) {
-                                                ?><option value="<?php esc_html_e( $postType );?>" <?php esc_html_e( $facet['postType'] == $postType ? "selected" : "" );?>><?php esc_html_e( $postType );?></option><?php
+                                                ?><option value="<?php echo esc_attr( $postType );?>" <?php echo esc_html( $facet['postType'] == $postType ? "selected" : "" );?>><?php echo esc_html( $postType );?></option><?php
                                             }
                                             ?>
                                         </select>
                                     </td>
                                     <td><label>Field</label></td>
                                     <td>
-                                        <select name="siqFacetField[]" required onchange="SIQ_changeFacetField(<?php esc_html_e( $i );?>);">
+                                        <select name="siqFacetField[]" required onchange="SIQ_changeFacetField(<?php echo esc_attr( $i );?>);">
                                             <?php echo wp_kses( $this->buildFacetFieldOptionList($facet['postType'], $mapping, $facet['field']), $this->kses_allowed_html_searchbox ); ?>
                                         </select>
-                                        <input type="hidden" name="siqFacetTargetField[]" value="<?php esc_html_e( !is_null($correctFacetTargetField) ? $correctFacetTargetField : "" );?>"/>
+                                        <input type="hidden" name="siqFacetTargetField[]" value="<?php echo esc_attr( !is_null($correctFacetTargetField) ? $correctFacetTargetField : "" );?>"/>
                                     </td>
-                                    <td class="siqFacetType <?php esc_html_e( $predefinedField ? "hidden" : "" );?>"><label>Type</label></td>
-                                    <td class="siqFacetType <?php esc_html_e( $predefinedField ? "hidden" : "" );?>">
-                                        <select name="siqFacetType[]" required onchange="SIQ_changeFacetType(<?php esc_html_e( $i );?>);">
+                                    <td class="siqFacetType <?php echo esc_attr( $predefinedField ? "hidden" : "" );?>"><label>Type</label></td>
+                                    <td class="siqFacetType <?php echo esc_attr( $predefinedField ? "hidden" : "" );?>">
+                                        <select name="siqFacetType[]" required onchange="SIQ_changeFacetType(<?php echo esc_attr( $i );?>);">
                                             <option value=""></option>
-                                            <option value="string" <?php esc_html_e( $correctFacetType == "string" ? "selected" : "" );?>>String</option>
-                                            <option value="number" <?php esc_html_e( $correctFacetType == "number" ? "selected" : "" );?>>Number</option>
-                                            <option value="rating" <?php esc_html_e( $correctFacetType == "rating" ? "selected" : "" );?>>Rating</option>
-                                            <option value="date" <?php esc_html_e( $correctFacetType == "date" ? "selected" : "" );?>>Date</option>
+                                            <option value="string" <?php echo esc_attr( $correctFacetType == "string" ? "selected" : "" );?>>String</option>
+                                            <option value="number" <?php echo esc_attr( $correctFacetType == "number" ? "selected" : "" );?>>Number</option>
+                                            <option value="rating" <?php echo esc_attr( $correctFacetType == "rating" ? "selected" : "" );?>>Rating</option>
+                                            <option value="date" <?php echo esc_attr( $correctFacetType == "date" ? "selected" : "" );?>>Date</option>
                                         </select>
                                     </td>
-                                    <td class="siqDateFormat <?php esc_html_e( ($correctFacetType != "date" || $facet["field"] == "timestamp") ? "hidden" : "" );?>"><label>Date format</label></td>
-                                    <td class="siqDateFormat <?php esc_html_e( ($correctFacetType != "date" || $facet["field"] == "timestamp") ? "hidden" : "" );?>">
+                                    <td class="siqDateFormat <?php echo esc_attr( ($correctFacetType != "date" || $facet["field"] == "timestamp") ? "hidden" : "" );?>"><label>Date format</label></td>
+                                    <td class="siqDateFormat <?php echo esc_attr( ($correctFacetType != "date" || $facet["field"] == "timestamp") ? "hidden" : "" );?>">
                                         <input type="text" name="siqFacetDateFormat[]"
-                                               value="<?php esc_html_e( (!is_null($correctFacetDateFormat) && strlen($correctFacetDateFormat) > 0) ? $correctFacetDateFormat : "Y-m-d\\TH:i:s\\.\\0\\0\\0" );?>"
-                                               <?php esc_html_e( $correctFacetType == "date" ? "required" : "" );?> />
+                                               value="<?php echo esc_attr( (!is_null($correctFacetDateFormat) && strlen($correctFacetDateFormat) > 0) ? $correctFacetDateFormat : "Y-m-d\\TH:i:s\\.\\0\\0\\0" );?>"
+                                               <?php echo esc_attr( $correctFacetType == "date" ? "required" : "" );?> />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td colspan="8">
-                                        <a href="javascript:SIQ_moveFacetUp(<?php esc_html_e( $i );?>);" class="siq-facet-move-up <?php esc_html_e( $i == 0 ? "hidden" : "" );?>">Move up</a>
-                                        <a href="javascript:SIQ_moveFacetDown(<?php esc_html_e( $i );?>);" class="siq-facet-move-down <?php esc_html_e( $i + 1 == count($facets) ? "hidden" : "" );?>">Move down</a>
-                                        <a href="javascript:SIQ_removeFacet(<?php esc_html_e( $i );?>);" class="siq-facet-remove">Remove</a>
+                                        <a href="javascript:SIQ_moveFacetUp(<?php echo esc_attr( $i );?>);" class="siq-facet-move-up <?php echo esc_attr( $i == 0 ? "hidden" : "" );?>">Move up</a>
+                                        <a href="javascript:SIQ_moveFacetDown(<?php echo esc_attr( $i );?>);" class="siq-facet-move-down <?php echo esc_attr( $i + 1 == count($facets) ? "hidden" : "" );?>">Move down</a>
+                                        <a href="javascript:SIQ_removeFacet(<?php echo esc_attr( $i );?>);" class="siq-facet-remove">Remove</a>
                                     </td>
                                 </tr>
                             </table>
@@ -169,10 +172,10 @@ if ($this->pluginSettings['facets_enabled']) {
                 }
                 ?>
             </div>
-
+            <div class="message normal">Click <b>Add new facet</b> button to add a new facet and <b>Save</b> button to complete the process in case any you have changed any settings.</div>
             <div>
-                <input type="button" name="btnAddFacet" id="btnAddFacet" value="Add facet" class="btn" onclick="SIQ_addNewFacet();return false;"><br/>
-                <input type="submit" name="siqFacetSubmit" class="btn" value="Save"/>
+                <input type="button" name="btnAddFacet" id="btnAddFacet" value="Add new facet" class="btn" onclick="SIQ_addNewFacet();return false;">
+                <input type="submit" name="siqFacetSubmit" id="siqFacetSubmit" class="btn" value="Save"/>
                 <?php wp_nonce_field( $this->updateFacetsNonce );?>
             </div>
         </div>

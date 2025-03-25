@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if(!empty( $_POST ) && isset($_POST['btnSubmitStyleOptions']) && check_admin_referer($this->updateAppearanceNonce)){
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
     $siq_styling						= array_map('sanitize_text_field', $_POST['styling'] );
     $siq_styling_						= array();
     if(count($siq_styling) > 0){
@@ -11,44 +12,44 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitStyleOptions']) && check_admin_ref
     }
     $error=array();
                 
-    $this->setCustomSearchNumRecords(sanitize_text_field($_POST['custom_search_num_records']));
+    $this->setCustomSearchNumRecords(isset($_POST['custom_search_num_records']) ? sanitize_text_field(wp_unslash( $_POST['custom_search_num_records'] )) : 0);
 
-    update_option($this->pluginOptions['custom_search_bar_placeholder'], sanitize_text_field($_POST['custom_search_bar_placeholder']));
+    update_option($this->pluginOptions['custom_search_bar_placeholder'], isset($_POST['custom_search_bar_placeholder']) ? sanitize_text_field(wp_unslash( $_POST['custom_search_bar_placeholder'] )): '');
 
-    if(isset($siq_styling_) && count($siq_styling_) > 0){
+    if(!empty($siq_styling_) && count($siq_styling_) > 0){
                     $settings 		= $this->getPluginSettings();
                     $stylingVar		= $settings['custom_search_page_style'];
                     $styling		= $this->getStyling($stylingVar);
                     $siq_styling_['customCss'] = 	$styling['customCss'];
         update_option($this->pluginOptions['custom_search_page_style'], $siq_styling_);
     }
-    $siq_use_custom_images			=	!empty($_POST['siq_use_custom_images']) ? sanitize_text_field($_POST['siq_use_custom_images']) : "";
-    $customSearchResultsInfoText =  ( isset($_POST['customSearchResultsInfoText']) && $_POST['customSearchResultsInfoText'] != "")? sanitize_text_field( $_POST['customSearchResultsInfoText'] ) : "Showing ##offset## to ##limit## of ##total## Results";
+    $siq_use_custom_images			=	!empty($_POST['siq_use_custom_images']) ? sanitize_text_field(wp_unslash($_POST['siq_use_custom_images'])) : "";
+    $customSearchResultsInfoText =  ( isset($_POST['customSearchResultsInfoText']) && $_POST['customSearchResultsInfoText'] != "")? sanitize_text_field( wp_unslash($_POST['customSearchResultsInfoText']) ) : "Showing ##offset## to ##limit## of ##total## Results";
     update_option($this->pluginOptions['customSearchResultsInfoText'], $customSearchResultsInfoText);
 
-    $customSearchResultsOrderRelevanceText =   ( isset($_POST['customSearchResultsOrderRelevanceText']) && sanitize_text_field( $_POST['customSearchResultsOrderRelevanceText'] ) != "")? sanitize_text_field( $_POST['customSearchResultsOrderRelevanceText']) : "Relevance";
+    $customSearchResultsOrderRelevanceText =   ( isset($_POST['customSearchResultsOrderRelevanceText']) && sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderRelevanceText']) ) != "")? sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderRelevanceText']) ): "Relevance";
     update_option($this->pluginOptions['customSearchResultsOrderRelevanceText'], $customSearchResultsOrderRelevanceText);
 
-    $customSearchResultsOrderNewestText =   ( isset($_POST['customSearchResultsOrderNewestText']) && sanitize_text_field( $_POST['customSearchResultsOrderNewestText'] ) != "")? sanitize_text_field( $_POST['customSearchResultsOrderNewestText'] ) : "Newest";
+    $customSearchResultsOrderNewestText =   ( isset($_POST['customSearchResultsOrderNewestText']) && sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderNewestText']) ) != "")? sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderNewestText']) ) : "Newest";
     update_option($this->pluginOptions['customSearchResultsOrderNewestText'], $customSearchResultsOrderNewestText);
 
-    $customSearchResultsOrderOldestText =  ( isset($_POST['customSearchResultsOrderOldestText']) && sanitize_text_field( $_POST['customSearchResultsOrderOldestText'] ) != "")? sanitize_text_field( $_POST['customSearchResultsOrderOldestText'] ) : "Oldest";
+    $customSearchResultsOrderOldestText =  ( isset($_POST['customSearchResultsOrderOldestText']) && sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderOldestText']) ) != "")? sanitize_text_field( wp_unslash($_POST['customSearchResultsOrderOldestText']) ) : "Oldest";
     update_option($this->pluginOptions['customSearchResultsOrderOldestText'], $customSearchResultsOrderOldestText);
 
-    $noRecordsFoundText =  ( isset($_POST['noRecordsFoundText']) && sanitize_text_field( $_POST['noRecordsFoundText'] ) != "")? sanitize_text_field( $_POST['noRecordsFoundText'] ): "No records found";
+    $noRecordsFoundText =  ( isset($_POST['noRecordsFoundText']) && sanitize_text_field( wp_unslash($_POST['noRecordsFoundText']) ) != "")? sanitize_text_field( wp_unslash($_POST['noRecordsFoundText']) ): "No records found";
     update_option($this->pluginOptions['noRecordsFoundText'], $noRecordsFoundText);
 
-    $paginationPrevText =  ( isset($_POST['paginationPrevText']) && sanitize_text_field( $_POST['paginationPrevText'] ) != "")? sanitize_text_field( $_POST['paginationPrevText'] ): "Prev";
+    $paginationPrevText =  ( isset($_POST['paginationPrevText']) && sanitize_text_field( wp_unslash($_POST['paginationPrevText']) ) != "")? sanitize_text_field( wp_unslash($_POST['paginationPrevText']) ): "Prev";
     update_option($this->pluginOptions['paginationPrevText'], $paginationPrevText);
 
-    $paginationNextText =  ( isset($_POST['paginationNextText']) && sanitize_text_field( $_POST['paginationNextText'] ) != "")? sanitize_text_field( $_POST['paginationNextText'] ): "Next";
+    $paginationNextText =  ( isset($_POST['paginationNextText']) && sanitize_text_field( wp_unslash($_POST['paginationNextText']) ) != "")? sanitize_text_field( wp_unslash($_POST['paginationNextText']) ): "Next";
     update_option($this->pluginOptions['paginationNextText'], $paginationNextText);
 
-    $showAuthorAndDate = isset($_POST['custom_page_display_author']) && sanitize_text_field( $_POST['custom_page_display_author'] ) ? "1" : "0";
+    $showAuthorAndDate = isset($_POST['custom_page_display_author']) && sanitize_text_field( wp_unslash($_POST['custom_page_display_author']) ) ? "1" : "0";
     update_option($this->pluginOptions['custom_page_display_author'], $showAuthorAndDate);
-    $showCategory = isset($_POST['custom_page_display_category']) && sanitize_text_field( $_POST['custom_page_display_category'] ) ? "1" : "0";
+    $showCategory = isset($_POST['custom_page_display_category']) && sanitize_text_field( wp_unslash($_POST['custom_page_display_category']) ) ? "1" : "0";
     update_option($this->pluginOptions['custom_page_display_category'], $showCategory);
-    $showTag = isset($_POST['custom_page_display_tag']) && sanitize_text_field( $_POST['custom_page_display_tag'] ) ? "1" : "0";
+    $showTag = isset($_POST['custom_page_display_tag']) && sanitize_text_field( wp_unslash($_POST['custom_page_display_tag']) ) ? "1" : "0";
     update_option($this->pluginOptions['custom_page_display_tag'], $showTag);
 
     if($siq_use_custom_images !=""){
@@ -63,28 +64,30 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitStyleOptions']) && check_admin_ref
         delete_option($this->pluginOptions['resultPageLayout']);
     }
 
-	$siq_displayContentFromStart			=	!empty($_POST['siq_displayContentFromStart']) ? sanitize_text_field($_POST['siq_displayContentFromStart']) : "";
+	$siq_displayContentFromStart			=	!empty($_POST['siq_displayContentFromStart']) ? sanitize_text_field(wp_unslash($_POST['siq_displayContentFromStart'])) : "";
 	if($siq_displayContentFromStart !=""){
         update_option($this->pluginOptions['siq_displayContentFromStart'],$siq_displayContentFromStart);
     }else{
         delete_option($this->pluginOptions['siq_displayContentFromStart']);
     }		
-    $siq_resultPageShowPostLink = isset($_POST['siq_resultPageShowPostLink']) && sanitize_text_field( $_POST['siq_resultPageShowPostLink'] ) ? 1 : self::DEFAULT_POST_URL_ENABLED;
+    $siq_resultPageShowPostLink = isset($_POST['siq_resultPageShowPostLink']) && sanitize_text_field( wp_unslash($_POST['siq_resultPageShowPostLink']) ) ? 1 : self::DEFAULT_POST_URL_ENABLED;
     update_option($this->pluginOptions['siq_resultPageShowPostLink'], $siq_resultPageShowPostLink);
     
-    $siq_resultPageCustomSearchItemLinkFontSize = isset($_POST['siq_resultPageCustomSearchItemLinkFontSize']) && sanitize_text_field( $_POST['siq_resultPageCustomSearchItemLinkFontSize'] ) ? sanitize_text_field( $_POST['siq_resultPageCustomSearchItemLinkFontSize'] ) : self::DEFAULT_POST_URL_FONT_SIZE;
+    $siq_resultPageCustomSearchItemLinkFontSize = isset($_POST['siq_resultPageCustomSearchItemLinkFontSize']) && sanitize_text_field( wp_unslash($_POST['siq_resultPageCustomSearchItemLinkFontSize']) ) ? sanitize_text_field( wp_unslash($_POST['siq_resultPageCustomSearchItemLinkFontSize']) ) : self::DEFAULT_POST_URL_FONT_SIZE;
     update_option($this->pluginOptions['siq_resultPageCustomSearchItemLinkFontSize'], $siq_resultPageCustomSearchItemLinkFontSize);
     
-    $siq_resultPageCustomSearchItemLinkColor = isset($_POST['siq_resultPageCustomSearchItemLinkColor']) && sanitize_text_field( $_POST['siq_resultPageCustomSearchItemLinkColor'] ) ? sanitize_text_field( $_POST['siq_resultPageCustomSearchItemLinkColor'] ) : self::DEFAULT_POST_URL_FONT_COLOR;
+    $siq_resultPageCustomSearchItemLinkColor = isset($_POST['siq_resultPageCustomSearchItemLinkColor']) && sanitize_text_field( wp_unslash($_POST['siq_resultPageCustomSearchItemLinkColor']) ) ? sanitize_text_field( wp_unslash($_POST['siq_resultPageCustomSearchItemLinkColor']) ) : self::DEFAULT_POST_URL_FONT_COLOR;
     update_option($this->pluginOptions['siq_resultPageCustomSearchItemLinkColor'], $siq_resultPageCustomSearchItemLinkColor);
     
 
     if (isset($_POST['descriptionSegments'])) {
-        update_option($this->pluginOptions['descriptionSegments'], sanitize_text_field( $_POST['descriptionSegments'] ));
+        update_option($this->pluginOptions['descriptionSegments'], sanitize_text_field( wp_unslash($_POST['descriptionSegments']) ));
     }
 
     $this->_siq_sync_settings();
-	
+    add_action('_siq_settings_update_notice', function () {
+        echo '<div class="update-nag siq-notices siq-notice-settings-update notice siq-notice-icon notice-success">Settings updated successfully.</div>';
+    });
 }
 
 $settings   = $this->getPluginSettings();
@@ -103,16 +106,16 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 
 ?>
 <div class="wsplugin">
- <h2>SearchIQ: Results Page <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php esc_html_e( esc_url( $this->userGuideLink ) );?>"><img style="vertical-align:bottom" src="<?php esc_html_e( esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ) ); ?>"> User Guide</a></h2>
+ <h2>SearchIQ: Results Page <a class="helpSign userGuide" target="_blank" style="text-decoration: none" href="<?php echo esc_url( $this->userGuideLink );?>"><img style="vertical-align:bottom" src="<?php echo esc_url( SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION.'/images/help/help-icon.png' ); //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>" alt="user guide"> User Guide</a></h2>
  <div class="dwAdminHeading">You can change appearance of custom ajax results page here. You can use the textbox on right to see the results.</div>
- <form method="POST" action="<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch&tab=tab-3') ) ); ?>" class="custom_page_options siq-styling-form" id="siq-results-styling-form" name="custom_options" onSubmit="">
+ <form method="POST" action="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-results-config') ); ?>" class="custom_page_options siq-styling-form" id="siq-results-styling-form" name="custom_options" onSubmit="">
      <div class="section section-0">
          <h2>Search</h2>
          <div class="data">
             <label>Show Matched Description Segments</label>
             <select name="descriptionSegments">
                 <?php for( $i = 1; $i <= 5; $i++){ ?>
-                    <option value="<?php esc_html_e( $i );?>" <?php esc_html_e( ($i == $descriptionSegments) ? "selected='selected'" : "" ); ?>><?php esc_html_e( $i ); ?></option> 
+                    <option value="<?php echo esc_attr($i);?>" <?php echo ($i == $descriptionSegments) ? "selected='selected'" : "" ; ?>><?php echo esc_html($i); ?></option> 
                 <?php } ?>
             </select>
         </div>
@@ -120,8 +123,8 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
              <div class="data">
                  <label>Default result page layout</label>
                  <select name="siqResultPageLayout">
-                     <option value="LIST" <?php esc_html_e( !isset($settings['resultPageLayout']) || $settings['resultPageLayout'] !== "GRID" ? "selected" : "" );?>>list</option>
-                     <option value="GRID" <?php esc_html_e( isset($settings['resultPageLayout']) && $settings['resultPageLayout'] === "GRID" ? "selected" : "" );?>>grid</option>
+                     <option value="LIST" <?php echo !isset($settings['resultPageLayout']) || $settings['resultPageLayout'] !== "GRID" ? "selected" : "" ;?>>list</option>
+                     <option value="GRID" <?php echo isset($settings['resultPageLayout']) && $settings['resultPageLayout'] === "GRID" ? "selected" : "" ;?>>grid</option>
                  </select>
              </div>
          <?php  } ?>
@@ -129,7 +132,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
              <label>Show images in search results</label>
              <input type="checkbox" name="siq_use_custom_images" id="siq_use_custom_images" value="yes"
                  <?php if(isset($siq_use_custom_images) && ($siq_use_custom_images=='yes')){
-                     esc_html_e( "checked ='checked'" );
+                     echo esc_html("checked ='checked'");
                  }?>
              />
          </div>
@@ -137,14 +140,14 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
              <label>Display Content From Start</label>
              <input type="checkbox" name="siq_displayContentFromStart" id="siq_displayContentFromStart" value="yes"
                  <?php if(isset($siq_displayContentFromStart) && ($siq_displayContentFromStart=='yes')){
-                     esc_html_e( "checked ='checked'" );
+                     echo esc_html("checked ='checked'");
                  }?>
              /><br/>
              <small>Select this if you want to show content from start of text in search results irrespective of matched text</small>
          </div>
          <div class="data">
              <label>Number records per page</label>
-             <input value="<?php esc_html_e( $this->getCustomSearchNumRecords() );?>" name="custom_search_num_records"/>
+             <input value="<?php echo esc_attr( intval($this->getCustomSearchNumRecords()) );?>" name="custom_search_num_records"/>
 	         <br/>
 	         <small>
 		         You need to click on submit button in order to see results for this change.
@@ -152,48 +155,48 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          </div>
 		  <div class="data">
              <label class="full">Search info <small>(available tags ##offset##, ##limit##, ##total##)</small></label>  <br/>
-             <input class="long longest" value="<?php esc_html_e( $customSearchResultsInfoText );?>" name="customSearchResultsInfoText"/>
+             <input class="long longest" value="<?php echo esc_attr( stripslashes($customSearchResultsInfoText) );?>" name="customSearchResultsInfoText"/>
          </div>
 		 
 		 <div class="data">
              <label class="">Order name for "Relevance"</label>
-             <input class="" value="<?php esc_html_e( $customSearchResultsOrderRelevanceText );?>" name="customSearchResultsOrderRelevanceText"/>
+             <input class="" value="<?php echo esc_attr( stripslashes($customSearchResultsOrderRelevanceText) );?>" name="customSearchResultsOrderRelevanceText"/>
          </div>
 		 
 		 <div class="data">
              <label class="">Order name for "Newest"</label>
-             <input class="" value="<?php esc_html_e( $customSearchResultsOrderNewestText );?>" name="customSearchResultsOrderNewestText"/>
+             <input class="" value="<?php echo esc_attr( stripslashes($customSearchResultsOrderNewestText) );?>" name="customSearchResultsOrderNewestText"/>
          </div>
 		 
 		 <div class="data">
              <label class="">Order name for "Oldest"</label>
-             <input class="" value="<?php esc_html_e( $customSearchResultsOrderOldestText );?>" name="customSearchResultsOrderOldestText"/>
+             <input class="" value="<?php echo esc_attr( stripslashes($customSearchResultsOrderOldestText) );?>" name="customSearchResultsOrderOldestText"/>
          </div>
 		 
 		 <div class="data">
              <label class="">No Records Found Message</label>
-             <input class="" value="<?php esc_html_e( $noRecordsFoundText );?>" name="noRecordsFoundText"/>
+             <input class="" value="<?php echo esc_attr( stripslashes($noRecordsFoundText) );?>" name="noRecordsFoundText"/>
          </div>
      </div>
      <div class="section section-1">
          <h2>Search Bar</h2>
          <div class="data">
              <label>Placeholder</label>
-             <input name="custom_search_bar_placeholder" class="long" value="<?php esc_html_e( $settings['custom_search_bar_placeholder'] ? $settings['custom_search_bar_placeholder'] : self::DEFAULT_CUSTOM_SEARCH_BAR_PLACEHOLDER );?>"/>
+             <input name="custom_search_bar_placeholder" class="long" value="<?php echo esc_attr( stripslashes($settings['custom_search_bar_placeholder'] ? $settings['custom_search_bar_placeholder'] : self::DEFAULT_CUSTOM_SEARCH_BAR_PLACEHOLDER ));?>"/>
          </div>
          <div class="data">
              <label>Background</label>
-             <input value="<?php esc_html_e( $styling['resultSearchBarBackground'] );?>" name="styling[resultSearchBarBackground]" class="color"/>
+             <input value="<?php echo esc_attr( $styling['resultSearchBarBackground'] );?>" name="styling[resultSearchBarBackground]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data">
              <label>Text color</label>
-             <input value="<?php esc_html_e( $styling['resultSearchBarColor'] );?>" name="styling[resultSearchBarColor]" class="color {required:false}"/>
+             <input value="<?php echo esc_attr( $styling['resultSearchBarColor'] );?>" name="styling[resultSearchBarColor]" class="color {required:false}"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data">
              <label>Powered By text color</label>
-             <input value="<?php esc_html_e( $styling['resultSearchBarPoweredByColor'] );?>" name="styling[resultSearchBarPoweredByColor]" class="color"/>
+             <input value="<?php echo esc_attr( $styling['resultSearchBarPoweredByColor'] );?>" name="styling[resultSearchBarPoweredByColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
      </div>
@@ -201,7 +204,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Single Result Box</h2>
 		<div class="data">
 			<label>Background color</label>
-			<input value="<?php esc_html_e( $styling['resultBoxBg'] ); ?>" name="styling[resultBoxBg]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultBoxBg'] ); ?>" name="styling[resultBoxBg]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -214,7 +217,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		</div>
 		<div class="data">
 			<label>Text Color</label>
-			<input value="<?php esc_html_e( $styling['resultTitleColor'] ); ?>" name="styling[resultTitleColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultTitleColor'] ); ?>" name="styling[resultTitleColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -222,7 +225,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Author & Date</h2>
                 <div class="data">
                     <label>Enable</label>
-                    <input type="checkbox" <?php esc_html_e( $settings["custom_page_display_author"] === "0" ? "" : "checked" );?> name="custom_page_display_author"/>
+                    <input type="checkbox" <?php echo esc_html( $settings["custom_page_display_author"] === "0" ? "" : "checked" );?> name="custom_page_display_author"/>
                 </div>
 		<div class="data">
 			<label>Font size</label>
@@ -232,7 +235,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		
 		<div class="data">
 			<label>Text Color</label>
-			<input value="<?php esc_html_e( $styling['resultAuthDateColor'] ); ?>" name="styling[resultAuthDateColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultAuthDateColor'] ); ?>" name="styling[resultAuthDateColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -245,7 +248,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		</div>
 		<div class="data">
 			<label>Text color</label>
-			<input value="<?php esc_html_e( $styling['resultTextColor'] ); ?>" name="styling[resultTextColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultTextColor'] ); ?>" name="styling[resultTextColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -253,7 +256,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Category</h2>
                 <div class="data">
                     <label>Enable</label>
-                    <input type="checkbox" <?php esc_html_e( $settings["custom_page_display_category"] === "0" ? "" : "checked" );?> name="custom_page_display_category"/>
+                    <input type="checkbox" <?php echo esc_html( $settings["custom_page_display_category"] === "0" ? "" : "checked" );?> name="custom_page_display_category"/>
                 </div>
 		<div class="data">
 			<label>Title font size</label>
@@ -262,12 +265,12 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		</div>
 		<div class="data">
 			<label>Title text color</label>
-			<input value="<?php esc_html_e( $styling['resultCatTitleColor'] ); ?>" name="styling[resultCatTitleColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultCatTitleColor'] ); ?>" name="styling[resultCatTitleColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 		<div class="data">
 			<label>Background color</label>
-			<input value="<?php esc_html_e( $styling['resultCatBgColor'] ); ?>" name="styling[resultCatBgColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultCatBgColor'] ); ?>" name="styling[resultCatBgColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -275,7 +278,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		<h2>Tags</h2>
                 <div class="data">
                     <label>Enable</label>
-                    <input type="checkbox" <?php esc_html_e( $settings["custom_page_display_tag"] === "0" ? "" : "checked" );?> name="custom_page_display_tag"/>
+                    <input type="checkbox" <?php echo esc_html( $settings["custom_page_display_tag"] === "0" ? "" : "checked" );?> name="custom_page_display_tag"/>
                 </div>
 		<div class="data">
 			<label>Font size</label>
@@ -284,7 +287,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
 		</div>
 		<div class="data">
 			<label>Text color</label>
-			<input value="<?php esc_html_e( $styling['resultTagColor'] ); ?>" name="styling[resultTagColor]" class="color"/>
+			<input value="<?php echo esc_attr( $styling['resultTagColor'] ); ?>" name="styling[resultTagColor]" class="color"/>
 			<div class="clearColor"><span></span></div>
 		</div>
 	</div>
@@ -293,7 +296,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          <h2>Display post URL on search result page</h2>
 		 <div class="data">
                     <label>Enable</label>
-                    <input type="checkbox" <?php esc_html_e( $settings["siq_resultPageShowPostLink"] === 0 ? "" : "checked" );?> name="siq_resultPageShowPostLink" value="1"/>
+                    <input type="checkbox" <?php echo esc_html( $settings["siq_resultPageShowPostLink"] === 0 ? "" : "checked" );?> name="siq_resultPageShowPostLink" value="1"/>
                 </div>
          <div class="data">
              <label>URL Font Size</label>
@@ -301,7 +304,7 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          </div>
          <div class="data without-line">
              <label>URL Font Color</label>
-             <input type="text" value="<?php esc_html_e( $settings['siq_resultPageCustomSearchItemLinkColor'] );?>" name="siq_resultPageCustomSearchItemLinkColor" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $settings['siq_resultPageCustomSearchItemLinkColor'] );?>" name="siq_resultPageCustomSearchItemLinkColor" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
      </div>
@@ -310,11 +313,11 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          <h2>Pagination</h2>
 		 <div class="data">
              <label class="">"Prev" label</label>
-             <input class="" value="<?php esc_html_e( $paginationPrevText );?>" name="paginationPrevText"/>
+             <input class="" value="<?php echo esc_html(stripslashes( $paginationPrevText ));?>" name="paginationPrevText"/>
          </div>
 		 <div class="data">
              <label class="">"Next" label</label>
-             <input class="" value="<?php esc_html_e( $paginationNextText );?>" name="paginationNextText"/>
+             <input class="" value="<?php echo esc_attr( stripslashes($paginationNextText) );?>" name="paginationNextText"/>
          </div>
          <div class="data">
              <label>Font size</label>
@@ -322,47 +325,47 @@ $descriptionSegments  = !empty($settings['descriptionSegments']) ? $settings['de
          </div>
          <div class="data without-line">
              <label>Selected page background</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationCurrentBackground'] );?>" name="styling[paginationCurrentBackground]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationCurrentBackground'] );?>" name="styling[paginationCurrentBackground]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data without-line">
              <label>Selected page text color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationCurrentColor'] );?>" name="styling[paginationCurrentColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationCurrentColor'] );?>" name="styling[paginationCurrentColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data">
              <label>Selected page border color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationCurrentBorderColor'] );?>" name="styling[paginationCurrentBorderColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationCurrentBorderColor'] );?>" name="styling[paginationCurrentBorderColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data without-line">
              <label>Other links background</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationActiveBackground'] );?>" name="styling[paginationActiveBackground]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationActiveBackground'] );?>" name="styling[paginationActiveBackground]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data without-line">
              <label>Other links text color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationActiveColor'] );?>" name="styling[paginationActiveColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationActiveColor'] );?>" name="styling[paginationActiveColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data">
              <label>Other links border color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationActiveBorderColor'] );?>" name="styling[paginationActiveBorderColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationActiveBorderColor'] );?>" name="styling[paginationActiveBorderColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data without-line">
              <label>Inactive links background</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationInactiveBackground'] );?>" name="styling[paginationInactiveBackground]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationInactiveBackground'] );?>" name="styling[paginationInactiveBackground]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data without-line">
              <label>Inactive links text color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationInactiveColor'] );?>" name="styling[paginationInactiveColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationInactiveColor'] );?>" name="styling[paginationInactiveColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
          <div class="data">
              <label>Inactive links border color</label>
-             <input type="text" value="<?php esc_html_e( $styling['paginationInactiveBorderColor'] );?>" name="styling[paginationInactiveBorderColor]" class="color"/>
+             <input type="text" value="<?php echo esc_attr( $styling['paginationInactiveBorderColor'] );?>" name="styling[paginationInactiveBorderColor]" class="color"/>
              <div class="clearColor"><span></span></div>
          </div>
      </div>

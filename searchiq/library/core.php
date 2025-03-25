@@ -225,7 +225,7 @@ class siq_core{
 		'paginationInactiveBackground'    => array('class' => '._siq_pagination span.disabled', 'default' => 'F1F1F1', 'property' => 'background-color', 'su' => '#', 'pr' => ''),
 		'paginationInactiveColor'    => array('class' => '._siq_pagination span.disabled', 'default' => 'D2D2D2', 'property' => 'color', 'su' => '#', 'pr' => ''),
 		'paginationInactiveBorderColor'    => array('class' => '._siq_pagination span.disabled', 'default' => 'DDDDDD', 'property' => 'border-color', 'su' => '#', 'pr' => ''),
-		'customCss'                     =>	array('class'=>'', 'default'=>'', 'property'=>'', 'su'=>'', 'pr'=>'','exclude'=>1)
+		'customCss'                     =>	array('class'=>'', 'default'=>'', 'property'=>'', 'su'=>'', 'pr'=>'','exclude'=>1) // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 	);
 	public $keysExepmtedFromSanitize = array('customCss', 'blackListUrls', 'allPostTypes', 'containerTag');
 	public $defaultAutocompleteTextResults = "Results";
@@ -307,6 +307,7 @@ class siq_core{
 	public $excludeCustomTaxonomies;
 	public $fieldForExcerpt;
 	public $baseFolder;
+	public $allPostTypes;
 	function __construct(){
 
 		$this->pluginOptions = array(
@@ -446,8 +447,8 @@ class siq_core{
 
 	public function getSyncSettings(){
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__);
-		global $pagenow;
-		if($pagenow == 'admin.php' && isset($_GET['page']) && $_GET['page'] == 'dwsearch' && $this->getSyncSettingsCalled == 0) {
+		$screen = get_current_screen();
+		if(!$screen === null && property_exists($screen, 'id') && $screen->id == 'toplevel_page_searchiq' && $this->getSyncSettingsCalled == 0) {
 			$this->_siq_get_sync_settings();
 		}
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
@@ -481,7 +482,8 @@ class siq_core{
 				$deletedPostIdsArray = $postIDs;
 			}
 			if(count($deletedPostIdsArray) > 0){
-				$deletedPostIds	=implode(",",$deletedPostIdsArray);		
+				$deletedPostIds	=implode(",",$deletedPostIdsArray);	
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder	
 				$wpdb->query( $wpdb->prepare( "DELETE FROM %5s  WHERE post_id IN(%5s)", array( $table_name, $deletedPostIds ) ) );
 				$result["success"] = 1;
 				$result["deleted"] = $deletedPostIdsArray;
@@ -501,8 +503,9 @@ class siq_core{
 			$query =substr($query,0,-1);	
 			if( !empty($query) ){
 				 $query .= " ON DUPLICATE KEY UPDATE sync_time = '%5s' ";
-			}	
-			$wpdb->query( $wpdb->prepare($query, array( $table_name, $currentTime ) ) );			
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$wpdb->query( $wpdb->prepare("{$query}", array( $table_name, $currentTime ) ) );			
 			$result["success"] = 1;
 			$result["inserted"] = $postIDs;
 			$result["query"] = $query;
@@ -567,12 +570,14 @@ class siq_core{
 			$this->log_error("QUERY TO GET POST ".$what." TO UPDATE INTO SYNC TABLE: ".json_encode($query)."");
 		}
 		 if($getCount) {
-		 	 $count = $wpdb->get_var( $wpdb->prepare( $query, array( $table_name, $post_table_name) ) );
+		 	 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		 	 $count = $wpdb->get_var( $wpdb->prepare( "{$query}", array( $table_name, $post_table_name) ) );
 			 $this->log_error("POST COUNT: ".$count);
 			 $this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 			 return $count;
 		 }else{
-		 	$allPosts = $wpdb->get_results( $wpdb->prepare( $query, array( $table_name, $post_table_name) ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		 	$allPosts = $wpdb->get_results( $wpdb->prepare( "{$query}", array( $table_name, $post_table_name) ) );
 			if(count($allPosts) > 0){
 				foreach($allPosts as $k=>$v){
 					$syncPosts .= $v->post_id.",";
@@ -604,7 +609,8 @@ class siq_core{
 		if($idsForDeletion){
 			$query = "DELETE FROM %5s WHERE `post_id` %5s;";
 			$this->log_error("QUERY TO DELETE POSTS FROM SYNC TABLE ".$query);
-			$response = $wpdb->query( $wpdb->prepare( $query, array( $table_name, $where ) ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$response = $wpdb->query( $wpdb->prepare( "{$query}", array( $table_name, $where ) ) );
 		}
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 		return $response;
@@ -639,10 +645,10 @@ class siq_core{
 		global $wpdb;
 		$setting		= array();
 		$option_name_string = '';
-        $query = "SELECT option_name, option_value from %5s WHERE option_name in (%5s)";
-        $option_name_string = "'".implode("','", $this->pluginOptions)."'";
-        
-		$results = $wpdb->get_results( wp_unslash( $wpdb->prepare( $query, array( $wpdb->prefix.'options', $option_name_string) ) ), ARRAY_A);
+		$option_name_string = "'".implode("','", $this->pluginOptions)."'";
+        $query = "SELECT option_name, option_value from %5s WHERE option_name in ({$option_name_string})";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$results = $wpdb->get_results( $wpdb->prepare( "{$query}", array("{$wpdb->prefix}options") ), ARRAY_A);
         
 		$finalresults = [];
         if(is_array($results) && count($results) > 0){
@@ -2211,7 +2217,7 @@ class siq_core{
 				if($response['response_code'] != ""){
 					$result				= $response['response_body'];
 					$result['response_code'] = $response['response_code'];
-					if(isset($response['response_body']['total']) && ( $response['response_body']['total'] > 0 || ($response['response_body']['total'] == 0 && count($response['response_body']['unsupported_document_type']) == $total) )){
+					if(isset($response['response_body']['total']) && ( $response['response_body']['total'] > 0 || ($response['response_body']['total'] == 0 && count($response['response_body']['unsupported_document_type']) == count($data)) )){
 						$result['success'] = true;
 						$result['response_body'] = $response["response_body"];
 					}
@@ -3191,7 +3197,8 @@ class siq_core{
         }
 
 		if(count($postTypes) == 0) {
-			$allFields = $wpdb->get_col( $wpdb->prepare( "SELECT `meta_key` FROM `%5s` WHERE ".$metaFieldsNotToBeQueriedNPT." GROUP BY meta_key ORDER BY meta_key;", $wpdb->postmeta) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$allFields = $wpdb->get_col($wpdb->prepare("SELECT `meta_key` FROM `%5s` WHERE {$metaFieldsNotToBeQueriedNPT} GROUP BY meta_key ORDER BY meta_key;", $wpdb->postmeta) );
 			$regularFields = array();
 			$systemFields  = array();
 			if( is_array($allFields) && count( $allFields ) > 0 ){
@@ -3241,7 +3248,8 @@ class siq_core{
 		$postTypeIncluded = is_array($postTypes) && count($postTypes) > 0 ? " po.post_type IN ('" . implode("','", $postTypes) . "') ": "";
 		$postTypeExcluded = empty($postTypeIncluded) && is_array($this->postTypesFilter) && count($this->postTypesFilter) > 0 ? " po.post_type NOT IN ('".implode("','",$this->postTypesFilter)."') ": '';
 		$queryAllMetaFields = "select pp.meta_key, GROUP_CONCAT(pp.post_type SEPARATOR ',') as post_type from (select pm.meta_key as meta_key, po.post_type as post_type from `%5s` pm left join `%5s` po on pm.post_id = po.ID where ". $postTypeIncluded. " " . $postTypeExcluded . " " . $metaFieldsNotToBeQueried . " group by pm.meta_key, po.post_type) pp group by pp.meta_key order by pp.meta_key";
-		$allMetaFields = $wpdb->get_results($wpdb->prepare($queryAllMetaFields, array($wpdb->postmeta, $wpdb->posts)));
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$allMetaFields = $wpdb->get_results($wpdb->prepare("{$queryAllMetaFields}", array($wpdb->postmeta, $wpdb->posts)));
 		return $allMetaFields;			
 	}
 
@@ -3406,7 +3414,7 @@ class siq_core{
 			$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 			return $stringPostTypes;
 		}
-		if(!empty($postType) && array_key_exists($postType, $arrPostType)){
+		if(!empty($postType) && array_key_exists($postType, $arrPostTypes)){
 			$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 			return $arrPostTypes[$postType];
 		}
@@ -3493,6 +3501,7 @@ class siq_core{
 
         // if woocommerce plugin is active then collect all the attribute names
         if ($this->woocommerceActive) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
             $allRecords = $wpdb->get_col("SELECT `meta_value` FROM `{$wpdb->postmeta}` WHERE meta_key = '_product_attributes';");
             foreach ($allRecords as $rec) {
                 $attrs = @unserialize($rec);
@@ -3711,6 +3720,7 @@ class siq_core{
 			}
 		}else if(!empty($media) && (int)$media > 0){
 			$dataMedia = get_post($media);
+			$mediaID = $dataMedia->ID;
 			if($dataMedia->post_mime_type = "application/pdf"){
 				$this->siq_insert_post($mediaID, $dataMedia);
 				$this->log_error("=== save pdf == ".json_encode($mediaID));
@@ -3864,6 +3874,7 @@ class siq_core{
 		}
 		global $wpdb;
 		$tbl = siq_core::errorTableName();
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$sql = $wpdb->prepare('INSERT INTO %5s (`request_url`, `request_method`, `request_body`, `status_code`, `response`) VALUES (%s, %s, %s, %d, %s);',
 								$tbl,
 								$url, 
@@ -3871,34 +3882,42 @@ class siq_core{
 								$request, 
 								$status_code, 
 								$response);
-		$wpdb->query($sql);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared	
+		$wpdb->query("{$sql}");
 	}
 
 	public function getAPIErrorRecordsCount() {
 		global $wpdb;
 		$tbl = siq_core::errorTableName();
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$sql = $wpdb->prepare('SELECT COUNT(`id`) FROM %5s;', $tbl);
-		return intval($wpdb->get_var($sql));
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return intval($wpdb->get_var("{$sql}"));
 	}
 
 	public function getAPIErrorRecords($page, $limit) {
 		global $wpdb;
 		$tbl = siq_core::errorTableName();
 		$offset = $page * $limit;
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$sql = $wpdb->prepare('SELECT * FROM %5s ORDER BY id DESC LIMIT %d, %d;', $tbl, $offset, $limit);
-		return $wpdb->get_results($sql);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder	,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->get_results("{$sql}");
 	}
 
 	public function deleteAPIErrorLogRecord($id) {
 		global $wpdb;
 		$tbl = siq_core::errorTableName();
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$sql = $wpdb->prepare('DELETE FROM `%5s` WHERE `id` = %d;', $tbl, $id);
-		$wpdb->query($sql);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query("{$sql}");
 	}
 
 	public function deleteAllAPIErrorLogRecords() {
 		global $wpdb;
 		$tbl = siq_core::errorTableName();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query("TRUNCATE $tbl;");
 	}
 
@@ -4063,6 +4082,7 @@ class siq_core{
 		if ( is_array($this->getPostTypesForIndexing()) && count($this->getPostTypesForIndexing()) > 0 ) {
 			$allowedPostTypes = 'AND post_type IN("' . implode('","', $this->getPostTypesForIndexing()) . '")';
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$childPosts = $wpdb->get_col($wpdb->prepare("SELECT ID FROM `%5s` WHERE post_parent = %d $allowedPostTypes AND post_status = 'publish';", $wpdb->posts, $post_id));
 		return $childPosts;
 	}
@@ -4071,12 +4091,14 @@ class siq_core{
 		global $wpdb;
 		if ( is_array($postIds) && count($postIds) > 0 ) {
 			$query = "SELECT p.*, GROUP_CONCAT(pm.meta_key SEPARATOR '<>') as meta_key, GROUP_CONCAT(IFNULL(pm.meta_value,'') SEPARATOR '<>') as meta_value FROM ( SELECT * FROM `%5s` p WHERE p.ID IN(" . implode(',', $postIds) . ") ) p LEFT JOIN `%5s` pm ON p.ID = pm.post_id GROUP BY p.ID ORDER BY p.ID ASC, pm.meta_id ASC";
-			$response = $wpdb->get_results($wpdb->prepare($query, array($wpdb->prefix . 'posts', $wpdb->prefix . 'postmeta')));
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$response = $wpdb->get_results($wpdb->prepare("{$query}", array($wpdb->prefix . 'posts', $wpdb->prefix . 'postmeta')));
 			if (!empty($response)) {
 				$docsForSubmission = array();
 				$dataTaxomony = array();
 				$taxQuery = "SELECT p.ID, tt.taxonomy, GROUP_CONCAT(t.name SEPARATOR '<>') as title FROM ( SELECT ID FROM `%5s` p WHERE p.ID IN(" . implode(',', $postIds) . ") ) p INNER JOIN `%5s` tr ON tr.object_id = p.ID INNER JOIN `%5s` tt ON tt.term_taxonomy_id = tr.term_taxonomy_id INNER JOIN `%5s` t ON t.term_id = tt.term_id GROUP BY p.ID, tt.taxonomy";
-				$dataTaxomony = $wpdb->get_results($wpdb->prepare($taxQuery, array($wpdb->prefix . 'posts', $wpdb->prefix . 'term_relationships', $wpdb->prefix . 'term_taxonomy', $wpdb->prefix . 'terms')));
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				$dataTaxomony = $wpdb->get_results($wpdb->prepare("{$taxQuery}", array($wpdb->prefix . 'posts', $wpdb->prefix . 'term_relationships', $wpdb->prefix . 'term_taxonomy', $wpdb->prefix . 'terms')));
 				foreach ($response as $k => &$v) {
 					if (isset($document_)) {
 						unset($document_);
@@ -4112,9 +4134,8 @@ class siq_core{
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__);
 		global $wpdb;
 		$table_name = $this->syncTableName();
-		$query = "TRUNCATE TABLE %5s;";
-		$this->log_error("QUERY TO TRUNCATE ALL POSTS FROM SYNC TABLE ".$query);
-		$wpdb->query( $wpdb->prepare( $query, array( $table_name ) ) );
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
+		$wpdb->query( $wpdb->prepare( "TRUNCATE TABLE %5s;", array( $table_name ) ) );
 		$this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 	}
 

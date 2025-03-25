@@ -37,20 +37,20 @@ class SIQ_Search_Widget extends WP_Widget {
 	function __construct() {
 		parent::__construct(
 			'siq_search_widget', // Base ID
-			__( 'SearchIQ search box', 'siq_text' ), // Name
-			array( 'description' => __( 'A Widget which displays a searchbox in the widget area', 'siq_text' ), ) // Args
+			__( 'SearchIQ search box', 'searchiq' ), // Name
+			array( 'description' => __( 'A Widget which displays a searchbox in the widget area', 'searchiq' ), ) // Args
 		);
 	}
 
 
 	public function widget( $args, $instance ) {
 		global $siq_plugin;
-		echo $args['before_widget'];
+		echo wp_kses_post($args['before_widget']);
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title']) . $args['after_title'];
+			echo wp_kses_post($args['before_title'] . apply_filters( 'widget_title', $instance['title']) . $args['after_title']);
 		}
 		echo wp_kses( $this->getWidgetHtml($instance), $siq_plugin->kses_allowed_html_config );
-		echo $args['after_widget'];
+		echo wp_kses_post($args['after_widget']);
 	}
 
 	public function getWidgetHtml($instance = array()){
@@ -99,19 +99,19 @@ class SIQ_Search_Widget extends WP_Widget {
 
 	public function form( $instance ) {
 		global $siq_plugin; 
-		$title 					= ! empty( $instance['title'] ) ? $instance['title'] : __( '', 'siq_text' );
-		$placeholder 			= ! empty( $instance['placeholder'] ) ? $instance['placeholder'] : __( 'Search', 'siq_text' );
+		$title 					= ! empty( $instance['title'] ) ? $instance['title'] : '';
+		$placeholder 			= ! empty( $instance['placeholder'] ) ? $instance['placeholder'] : __( 'Search', 'searchiq' );
 		$postCatFilterClause	= ! empty( $instance['postCatFilterClause'] ) ? $instance['postCatFilterClause'] : $siq_plugin->categoryFilterClause["default"];
 		$postcatidfilter		= ! empty( $instance['postcatidfilter'] ) ? $instance['postcatidfilter'] : array();
 		?>
 		<p>
-			<label for="<?php esc_attr_e( $this->get_field_id( 'title' ) ); ?>"><b><?php esc_attr_e( 'Title:' ); ?></b></label>
-			<input class="widefat" id="<?php esc_attr_e( $this->get_field_id( 'title' ) ); ?>" name="<?php esc_attr_e( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php esc_attr_e( $title ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><b><?php esc_attr_e( 'Title:', 'searchiq' ); ?></b></label>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 
 		<p>
-			<label for="<?php esc_attr_e( $this->get_field_id( 'placeholder' ) ); ?>"><b><?php esc_html_e( esc_attr( 'Placeholder Text:' ) ); ?></b></label>
-			<input class="widefat" id="<?php esc_attr_e( $this->get_field_id( 'placeholder' ) ); ?>" name="<?php esc_attr_e( $this->get_field_name( 'placeholder' ) ); ?>" type="text" value="<?php esc_attr_e( $placeholder ); ?>">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'placeholder' ) ); ?>"><b><?php esc_html_e('Placeholder Text:', 'searchiq' ); ?></b></label>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'placeholder' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'placeholder' ) ); ?>" type="text" value="<?php echo esc_attr( $placeholder ); ?>">
 		</p>
 		<?php 
 			$postTypeForSearch = $siq_plugin->getPostTypesForSearchOnWidget();
@@ -119,13 +119,13 @@ class SIQ_Search_Widget extends WP_Widget {
 				$postTypes = ! empty( $instance['postTypes'] ) ? ( !is_array( $instance['postTypes'] ) ? explode(',', $instance['postTypes']) : $instance['postTypes'] ) : array();
 		?>
 			<p>
-				<label><b><?php esc_html_e( esc_attr( 'Post types for search:' ) ); ?></b></label><br/>
+				<label><b><?php esc_html_e( 'Post types for search:' ,'searchiq' ); ?></b></label><br/>
 				<?php 
 					foreach($postTypeForSearch as $k => $v) { 
 						$checked = in_array($v, $postTypes) ? "checked=checked" : "";
 				?>
-						<input <?php esc_attr_e( $checked );?> type="checkbox"  id="<?php esc_attr_e( $this->get_field_id( 'postTypes' ."_".$v) ); ?>" name="<?php esc_attr_e( $this->get_field_name( 'postTypes' ) ); ?>[]" value="<?php esc_attr_e( $v );?>" />
-						<label  for="<?php esc_attr_e( $this->get_field_id( 'postTypes' ."_".$v) ); ?>" ><?php esc_attr_e( $v );?></label><br/>
+						<input <?php echo esc_html( $checked );?> type="checkbox"  id="<?php echo esc_attr( $this->get_field_id( 'postTypes' ."_".$v) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'postTypes' ) ); ?>[]" value="<?php echo esc_attr( $v );?>" />
+						<label  for="<?php echo esc_attr( $this->get_field_id( 'postTypes' ."_".$v) ); ?>" ><?php echo esc_attr( $v );?></label><br/>
 				<?php } ?>
 			</p>
 		<?php
@@ -133,7 +133,7 @@ class SIQ_Search_Widget extends WP_Widget {
 			if(class_exists('SIQ_Walker_Category_Checklist_Widget')){ ?>
 				<div class="siq_group">
 					 <div class="siq_group_inner limitheight">
-						<label for="<?php esc_attr_e( $this->get_field_id( 'postcatidfilter' ) ); ?>"><b><?php esc_attr_e( 'Filter results by category:' ); ?></b></label>
+						<label for="<?php echo esc_attr( $this->get_field_id( 'postcatidfilter' ) ); ?>"><b><?php esc_attr_e( 'Filter results by category:', 'searchiq' ); ?></b></label>
 						<ul class="siq_widget_list siq_widget_catlist">
 							<?php   $walker = new SIQ_Walker_Category_Checklist_Widget(
 													$this->get_field_name( 'postcatidfilter' ), 
@@ -143,10 +143,10 @@ class SIQ_Search_Widget extends WP_Widget {
 						</ul>
 					</div>
 					<p>
-						<label for="<?php esc_attr_e( $this->get_field_id( 'postCatFilterClause' ) ); ?>"><b><?php esc_attr_e( 'Clause to be used in filter:' ); ?></b></label>
-						<select name="<?php esc_attr_e( $this->get_field_name( 'postCatFilterClause' ) ); ?>">
+						<label for="<?php echo esc_attr( $this->get_field_id( 'postCatFilterClause' ) ); ?>"><b><?php esc_attr_e( 'Clause to be used in filter:', 'searchiq' ); ?></b></label>
+						<select name="<?php echo esc_attr( $this->get_field_name( 'postCatFilterClause' ) ); ?>">
 						<?php foreach($siq_plugin->categoryFilterClause["clauses"] as $k => $v){ ?>
-								<option value='<?php esc_attr_e($v);?>' <?php esc_attr_e( ($postCatFilterClause == $v ? "selected='Selected'": "") ) ?>><?php esc_attr_e( $siq_plugin->createFilterLabel($v) );?></option>
+								<option value='<?php echo esc_attr($v);?>' <?php echo esc_html( ($postCatFilterClause == $v ? "selected='Selected'": "") ) ?>><?php echo esc_html( $siq_plugin->createFilterLabel($v) );?></option>
 						<?php } ?>
 						</select>
 					</p>

@@ -73,9 +73,12 @@ class siq_plugin extends siq_shortcode{
 	public $forgotPasswordLink;
 	public $pricingPageLink;
 	public $loginPageLink;
-	public $pluginIconUrl;
 	public $siq_custom_get_param;
 	public $siq_menu_select_box_direction;
+	public $deltaPostIDs;
+	public $recordsPerPage;
+	public $numPages;
+	public $totalResults;
 
 	public static function init(){
 		new self;
@@ -93,21 +96,15 @@ class siq_plugin extends siq_shortcode{
 		$this->forgotPasswordLink       = $this->clearLink(SIQ_SERVER_BASE.SIQ_SERVER_SUB_FOLDER."forgot-password.html");
 		$this->pricingPageLink			= $this->clearLink(SIQ_SERVER_BASE.SIQ_SERVER_SUB_FOLDER."pricing.html");
 		$this->loginPageLink			= $this->clearLink(SIQ_SERVER_BASE.SIQ_SERVER_SUB_FOLDER."login.html");
-		$this->pluginIconUrl			= SIQ_BASE_URL.'/assets/'.SIQ_PLUGIN_VERSION."/images/icon.png";
 		parent::enableErrorLog($this->logError, $this->logInfo);
 		parent::__construct();
-		global $paged, $post;																							// TODO: not using variables must be deleted
 		$this->getDomain();																								// get domain name without protocol and with root WordPress installation path and set it to $this->domain (for ex. example.com/wp)
 		$this->createLabels();
 		$this->searchPostsPerCall = get_option('posts_per_page');
 		$api_key = $siqAPIClient->siq_get_api_key();
 		$this->siq_custom_get_param = "";
 		$searchQueryParamName = $this->getSearchQueryParamName();
-		if(!empty($searchQueryParamName)){
-			$this->siq_custom_get_param = $searchQueryParamName;
-		}else{
-			$this->siq_custom_get_param = SIQ_CUSTOM_GET_PARAM;
-		}
+		$this->siq_custom_get_param = (!empty($searchQueryParamName)) ? $searchQueryParamName : SIQ_CUSTOM_GET_PARAM;
 		
 		add_action( 'admin_menu', array($this, 'createAdminMenu') );
 		add_action( 'admin_enqueue_scripts', array($this, 'addScriptsAndStyles'));
@@ -224,10 +221,11 @@ class siq_plugin extends siq_shortcode{
 		);
 	}
 
-	function errorHandler($errno, $errstr, $errfile, $errline){
+	public function errorHandler($errno, $errstr, $errfile, $errline){
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting	
 		if (!(error_reporting() & $errno)) {
 			// This error code is not included in error_reporting
-			return;
+			return false;
 		}
 		$type = $this->FriendlyErrorType($errno);
 		$this->errorMessage .= "Error: [".$type."] $errstr in $errfile on line number $errline\n";
@@ -248,7 +246,7 @@ class siq_plugin extends siq_shortcode{
 			header('content-type: application/json');
 			$this->log_error("SIQ AJAX ERROR:script shut down: result('".json_encode($result)."');","error");
 			$response = $result;
-			esc_html_e( json_encode($response) );
+			echo esc_html( json_encode($response) );
 			die();
 		}else if($error['type'] != ""){
 			$type = $this->FriendlyErrorType($error['type']);
@@ -257,79 +255,50 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function FriendlyErrorType($type){
-		switch($type)
-		{
-			case E_ERROR: // 1 //
-				return 'E_ERROR';
-			case E_WARNING: // 2 //
-				return 'E_WARNING';
-			case E_PARSE: // 4 //
-				return 'E_PARSE';
-			case E_NOTICE: // 8 //
-				return 'E_NOTICE';
-			case E_CORE_ERROR: // 16 //
-				return 'E_CORE_ERROR';
-			case E_CORE_WARNING: // 32 //
-				return 'E_CORE_WARNING';
-			case E_COMPILE_ERROR: // 64 //
-				return 'E_COMPILE_ERROR';
-			case E_COMPILE_WARNING: // 128 //
-				return 'E_COMPILE_WARNING';
-			case E_USER_ERROR: // 256 //
-				return 'E_USER_ERROR';
-			case E_USER_WARNING: // 512 //
-				return 'E_USER_WARNING';
-			case E_USER_NOTICE: // 1024 //
-				return 'E_USER_NOTICE';
-			case E_STRICT: // 2048 //
-				return 'E_STRICT';
-			case E_RECOVERABLE_ERROR: // 4096 //
-				return 'E_RECOVERABLE_ERROR';
-			case E_DEPRECATED: // 8192 //
-				return 'E_DEPRECATED';
-			case E_USER_DEPRECATED: // 16384 //
-				return 'E_USER_DEPRECATED';
-		}
-		return "";
+		$errorTypes = array(
+			E_ERROR => 'E_ERROR',
+			E_WARNING => 'E_WARNING',
+			E_PARSE => 'E_PARSE',
+			E_NOTICE => 'E_NOTICE',
+			E_CORE_ERROR => 'E_CORE_ERROR',
+			E_CORE_WARNING => 'E_CORE_WARNING',
+			E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+			E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+			E_USER_ERROR => 'E_USER_ERROR',
+			E_USER_WARNING => 'E_USER_WARNING',
+			E_USER_NOTICE => 'E_USER_NOTICE',
+			E_STRICT => 'E_STRICT',
+			E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+			E_DEPRECATED => 'E_DEPRECATED',
+			E_USER_DEPRECATED => 'E_USER_DEPRECATED'
+		);
+		return $errorTypes[$type] ?? "";
 	}	
 
 	public function checkSyncStatus(){
-		$option = get_option($this->serverDownKey, 0);
-		return $option;
+		return get_option($this->serverDownKey, 0);
 	}
 
 	public function getStyling($styling = array()){
-		$stlingVar = array();
+		$stlingVar = [];
 		foreach($this->styling as $k => $v){
-			if(isset($styling[$k]) && $styling[$k] != ""){
-				$stlingVar[$k] = stripslashes($styling[$k]);
-			}else{
-				$stlingVar[$k] = stripslashes($v['default']);
-			}
+			$stlingVar[$k] = (isset($styling[$k]) && $styling[$k] != "") ? stripslashes($styling[$k]) : stripslashes($v['default']);
 		}
 		return $stlingVar;
 	}
 
 	public function getAutocompleteStyling($styling = array()){
-		$stlingVar = array();
+		$stlingVar = [];
 		foreach($this->autocompleteStyling as $k => $v){
-			if(isset($styling[$k]) && $styling[$k] != ""){
-				$stlingVar[$k] = $styling[$k];
-			}else{
-				$stlingVar[$k] = $v['default'];
-			}
+			$stlingVar[$k] = (isset($styling[$k]) && $styling[$k] != "") ? $styling[$k] : $v['default'];
 		}
 		return $stlingVar;
 	}
 
 	public function getMobileStyling($styling = array()){
-		$stlingVar = array();
+		$stlingVar = [];
 		foreach($this->mobileStyling as $k => $v){
-			if(isset($styling[$k]) && $styling[$k] != ""){
-				$stlingVar[$k] = $styling[$k];
-			}else{
-				$stlingVar[$k] = $v['default'];
-			}
+			$stlingVar[$k] = (isset($styling[$k]) && $styling[$k] != "") ? $styling[$k] : $v['default'];
 		}
 		return $stlingVar;
 	}
@@ -337,11 +306,11 @@ class siq_plugin extends siq_shortcode{
 
 	public function getFontSizeBox($name, $val, $start = 10, $end = 30){
 		$strFontBox = "";
-		$strFontBox .= "<select name='".$name."' id='".$name."' class='fontBox' >";
+		$strFontBox .= "<select name='$name' id='$name' class='fontBox' >";
 		$strFontBox .= "<option  value=''>-- Select --</option>";
 		for ($v = $start; $v <= $end; ++$v) {
 			$selectedOpt = ($v == $val) ? "selected='selected' ": "" ;
-			$strFontBox .= "<option ".$selectedOpt." value='".$v."'>".$v."px</option>";
+			$strFontBox .= "<option $selectedOpt value='$v'>{$v}px</option>";
 		}
 		$strFontBox .= "</select>";
 		return $strFontBox;
@@ -366,7 +335,7 @@ class siq_plugin extends siq_shortcode{
 
 	public function checkNotices($notices, $word){
 		if(count($notices) > 0){
-			foreach($notices as $k=>$v){
+			foreach($notices as $v){
 				if(strpos($v, $word) !== false){
 					return true;
 				}
@@ -384,7 +353,7 @@ class siq_plugin extends siq_shortcode{
 				`sync_time` DATETIME NULL,
 				UNIQUE INDEX `post_id_UNIQUE` (`post_id`)
 		) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 		$this->alterTable();
 
@@ -412,7 +381,6 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function siq_update_db_check() {
-		// echo (is_admin() ? 'ADMIN' : 'NON-ADMIN') . " -> " . get_site_option('siq_db_version') . ' (' . $this->siq_db_version . ')';
 		if ( is_admin() && get_site_option( 'siq_db_version' ) != $this->siq_db_version ) {
 			$this->siq_install_error_table();
 		}
@@ -421,6 +389,7 @@ class siq_plugin extends siq_shortcode{
 	public function alterTable(){
 		global $wpdb;
 		$table_name = siq_plugin::syncTableName();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$all_objects = $wpdb->get_results( $wpdb->prepare("DESCRIBE `%5s`",  $table_name ) );
 		$flagField = 0;
 		if(empty($wpdb->last_error)){
@@ -431,6 +400,7 @@ class siq_plugin extends siq_shortcode{
 			  }
 			}
 			if($flagField == 1){
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.DirectDatabaseQuery.SchemaChange
 				$wpdb->query( $wpdb->prepare("ALTER TABLE `%5s` CHANGE `%5s` `%5s` DATETIME NULL", array( $table_name, $this->syncTableFieldToBeRemoved, 'sync_time') ) );
 			}
 		}
@@ -461,7 +431,7 @@ class siq_plugin extends siq_shortcode{
 		}
 	}
 
-	function siq_admin_notices() {
+	public function siq_admin_notices() {
 		$notices = get_option('_siq_admin_notices', array());
 		$checkSync	= $this->checkSyncStatus();
 		if($checkSync){
@@ -478,7 +448,7 @@ class siq_plugin extends siq_shortcode{
 
 	public function siq_admin_notice_for_searchbox(){
 		$wpnonce = wp_create_nonce( $this->siteNoticeNonceString );
-		if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], $this->siteNoticeNonceString ) && isset($_GET['showIconNotice']) && $_GET['showIconNotice'] == 0){
+		if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field(wp_unslash($_GET['_wpnonce'])), $this->siteNoticeNonceString ) && isset($_GET['showIconNotice']) && $_GET['showIconNotice'] == 0){
 			update_option('_siq_hide_icon_notice', 1);
 		}
 		$getNoticeStatus = get_option('_siq_hide_icon_notice', 0);
@@ -486,7 +456,7 @@ class siq_plugin extends siq_shortcode{
 			$notice = "<b>SearchIQ:</b> If your site doesn’t have a search bar, then add a SearchIQ search box from widget or add search icon in menu from SearchIQ options tab ";
 			printf( 
 				'<div class="update-nag siq-notices notice notice-warning inline siq-notice-icon">%1$s<a href="%2$s" class="disableAdminNotice siqNoticeDismiss">Dismiss</a></div>', 
-				wp_kses( $notice, array('b' => array() ) ), esc_url(get_admin_url() . "admin.php?page=dwsearch&showIconNotice=0&_wpnonce=".$wpnonce) 
+				wp_kses( $notice, array('b' => array() ) ), esc_url(get_admin_url() . "admin.php?page=searchiq&showIconNotice=0&_wpnonce=".$wpnonce) 
 			);
 		}
 	}
@@ -497,13 +467,13 @@ class siq_plugin extends siq_shortcode{
 		if(!empty($this->pluginSettings['engine_code'])){
 			$currTime = current_time('timestamp', 1);
 			$arrayReviewNotice = array("time" => $currTime, "show"=>1, "dismiss"=>0);
-			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], $this->siteNoticeNonceString ) && isset($_GET['showReviewNotice']) && $_GET['showReviewNotice'] == 0){
+			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field(wp_unslash($_GET['_wpnonce'])), $this->siteNoticeNonceString ) && isset($_GET['showReviewNotice']) && $_GET['showReviewNotice'] == 0){
 				$arrayReviewNotice['time'] 		= $currTime+86400*30;
 				$arrayReviewNotice['show'] 	= 0;
 				$arrayReviewNotice['dismiss'] = 0;
 				update_option('_siq_hide_review_notice', $arrayReviewNotice);
 			}
-			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], $this->siteNoticeNonceString ) && isset($_GET['reviewNoticeDismiss']) && $_GET['reviewNoticeDismiss'] == 1){
+			if( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field(wp_unslash($_GET['_wpnonce'])), $this->siteNoticeNonceString ) && isset($_GET['reviewNoticeDismiss']) && $_GET['reviewNoticeDismiss'] == 1){
 				$arrayReviewNotice['time'] 		= $currTime+86400*30;
 				$arrayReviewNotice['show'] 	= 0;
 				$arrayReviewNotice['dismiss'] = 1;
@@ -528,10 +498,10 @@ class siq_plugin extends siq_shortcode{
 							</div>';
 				printf(
 					wp_kses($notice, array('div' => array('class' => array() ), 'span' => array('class' => array() ), 'b'=> array(), 'h3'=> array(), 'p' => array( 'class' => array( ) ), 'a' => array('href'=> array(), 'class' => array(), 'target' => array()  ) ) ), 
-					esc_url(get_admin_url() . "admin.php?page=dwsearch&showReviewNotice=0&_wpnonce=".$wpnonce), 
+					esc_url(get_admin_url() . "admin.php?page=searchiq&showReviewNotice=0&_wpnonce=".$wpnonce), 
 					esc_url('https://wordpress.org/support/plugin/searchiq/reviews/#new-post'), 
 					esc_url('https://wordpress.org/support/plugin/searchiq/#new-post'),
-					esc_url(get_admin_url() . "admin.php?page=dwsearch&reviewNoticeDismiss=1&_wpnonce=".$wpnonce)
+					esc_url(get_admin_url() . "admin.php?page=searchiq&reviewNoticeDismiss=1&_wpnonce=".$wpnonce)
 				);
 			}
 		}
@@ -545,44 +515,13 @@ class siq_plugin extends siq_shortcode{
 		}
 		return $classes;
 	}
-	public function checkIfServerWorking(){
-		$searchJs = @get_headers("http:" . $this->customSearchPageJs);
-		if($searchJs != "" && count($searchJs) > 0 && strpos($searchJs[0], '200') !== FALSE){
-			return true;
-		}
-		return false;
-	}
 
 	public function check_if_search(){
         global $post;
-        $searchBoxName = $this->getSearchboxName();
-        $searchQuery = '';
-        $searchQueryVal = get_search_query();
-		$searchbox_query_var = get_query_var( $searchBoxName );
+        $siq_custom_get_param = get_query_var( $this->siq_custom_get_param );
 
-		$siq_e = get_query_var( 'siq_e' );
-		$siq_result = get_query_var( 'result' );
-		$siq_custom_get_param = get_query_var( $this->siq_custom_get_param );
-
-		if ( ! empty( $searchQueryVal ) ) {
-            $searchQuery = rawurlencode( wp_unslash( $searchQueryVal ) );
-        } else if ( !is_null( $searchbox_query_var ) && !empty( $searchbox_query_var ) ) {
-            $searchQuery = rawurlencode( sanitize_text_field( wp_unslash( $searchbox_query_var ) ) );
-        }
 		$postID = is_numeric( $this->pluginSettings['custom_search_page'] ) ? $this->pluginSettings['custom_search_page']  : url_to_postid($this->pluginSettings['custom_search_page']);
-		if ( ( is_search() || !empty( $searchbox_query_var ) && ( is_home() || ( ! empty( $post ) && ! empty( $postID ) && $postID == $post->ID ) ) ) && $this->is_custom_search_page_set() && ! empty( $siq_e ) && $searchQuery != '' && $this->pluginSettings['engine_code'] != '' ) {
-            if ( $this->checkIfServerWorking() ) {
-                $resultOnOff = !empty( $siq_result ) ? '&result=' . urlencode( sanitize_text_field( wp_unslash( $siq_result ) ) ) : '';
-                $redirect = $this->getSearchPageUrl($this->pluginSettings['custom_search_page']);
-                if ( strpos( $redirect, '?' ) === false ) {
-                    $redirect .= '?' . $this->siq_custom_get_param . '=' . $searchQuery . $resultOnOff;
-                } else {
-                    $redirect .= '&' . $this->siq_custom_get_param . '=' . $searchQuery . $resultOnOff;
-                }
-                wp_redirect( $redirect );
-                exit();
-            }
-        } else if ( ! empty( $post ) && $post->ID == $this->pluginSettings['custom_search_page'] && !empty( $siq_custom_get_param ) ) {
+		if ( ! empty( $post ) && $post->ID == $postID && !empty( $siq_custom_get_param ) ) {
             set_query_var( 's', sanitize_text_field( wp_unslash( $siq_custom_get_param ) ) );
         }
 
@@ -766,20 +705,82 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function createAdminMenu(){
-		add_menu_page(__('SearchIQ', 'dwsearch'),__('SearchIQ', 'dwsearch'),'manage_options', 'dwsearch', array($this, "config"), $this->pluginIconUrl);
+		$settings = $this->getPluginSettings();
+		add_menu_page(__('SearchIQ', 'searchiq'), __('SearchIQ', 'searchiq'),'manage_options', __('searchiq', 'searchiq'), array($this, "config"), 'none');
+		add_submenu_page(
+			__('searchiq', 'searchiq'),
+			__('Configuration', 'searchiq'),
+			__('Configuration', 'searchiq'),
+			'manage_options',
+			__('searchiq', 'searchiq')
+		);
+		if (isset($settings['engine_code']) && !empty($settings['engine_code'])) {
+			add_submenu_page(
+				__('searchiq', 'searchiq'),
+				__('Options', 'searchiq'),
+				__('Options', 'searchiq'),
+				'manage_options',
+				'searchiq-options',
+				array($this, "config")
+			);
+			add_submenu_page(
+				__('searchiq', 'searchiq'),
+				__('Results Page Config', 'searchiq'),
+				__('Results Page Config', 'searchiq'),
+				'manage_options',
+				'searchiq-results-config',
+				array($this, "config")
+			);
+			add_submenu_page(
+				__('searchiq', 'searchiq'),
+				__('Autocomplete Config', 'searchiq'),
+				__('Autocomplete Config', 'searchiq'),
+				'manage_options',
+				'searchiq-autocomplete-config',
+				array($this, "config")
+			);
+			add_submenu_page(
+				__('searchiq', 'searchiq'),
+				__('Mobile Config', 'searchiq'),
+				__('Mobile Config', 'searchiq'),
+				'manage_options',
+				'searchiq-mobile-config',
+				array($this, "config")
+			);
+			if (isset($this->pluginSettings["facets_enabled"]) && !!$this->pluginSettings["facets_enabled"]) {
+				add_submenu_page(
+					__('searchiq', 'searchiq'),
+					__('Facets Config', 'searchiq'),
+					__('Facets Config', 'searchiq'),
+					'manage_options',
+					'searchiq-facets-config',
+					array($this, "config")
+				);
+			}
+			if ($this->isAPIErrorLogEnabled() || $this->getAPIErrorRecordsCount() > 0) {
+				add_submenu_page(
+					__('searchiq', 'searchiq'),
+					__('Error Log', 'searchiq'),
+					__('Error Log', 'searchiq'),
+					'manage_options',
+					'searchiq-api-error-log',
+					array($this, "config")
+				);
+			}
+		}
 	}
 
 	public function addScriptsAndStyles($hook){
 		wp_register_style( 'siq_admin_css', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/css/admin-style.css', false, time());
 		wp_enqueue_style('siq_admin_css');
-		if(strpos($hook, 'dwsearch') !== FALSE){
+		if(strpos($hook, 'searchiq') !== FALSE){
 			wp_register_style( 'siq_admin_s2_css', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/css/select2.min.css', false, time());
 			wp_enqueue_style('siq_admin_s2_css');
 
-			wp_register_script( 'siq_admin_select2', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/js/select2.min.js', array('jquery'), time());
+			wp_register_script( 'siq_admin_select2', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/js/select2.min.js', array('jquery'), time(), array('in_footer'=>true));
 			wp_enqueue_script('siq_admin_select2');
 
-			wp_register_script( 'siq_admin_js', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/js/admin-script.js', array('jquery'), time());
+			wp_register_script( 'siq_admin_js', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/js/admin-script.js', array('jquery'), time(), array('in_footer'=>true));
 			wp_enqueue_script('siq_admin_js');
 			wp_localize_script( 'siq_admin_js', 'siq_admin_js_object',
 				array( 
@@ -787,7 +788,7 @@ class siq_plugin extends siq_shortcode{
 				)
 			);
 
-			wp_register_script( 'siq_color_js', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/jscolor/jscolor.js', array('jquery'), time());
+			wp_register_script( 'siq_color_js', SIQ_BASE_URL. '/assets/'.SIQ_PLUGIN_VERSION.'/jscolor/jscolor.js', array('jquery'), time(), array('in_footer' => true));
 			wp_enqueue_script('siq_color_js');
 			add_filter('upload_mimes', array($this, 'siq_myme_types'), 1, 1);
 			wp_enqueue_media();
@@ -841,7 +842,7 @@ class siq_plugin extends siq_shortcode{
 			$this->log_error("SIQ AJAX ERROR:script execution terminated: ".__FILE__.":".__FUNCTION__." error('".json_encode($result)."');","error");
 			header('content-type: application/json');
 			$response = $result;
-			esc_html_e( json_encode($response) );
+			echo esc_html( json_encode($response) );
 			exit;
 		}
 	}
@@ -851,14 +852,14 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function checkIfInAdmin(){
-		$server_referrer = strtolower( sanitize_text_field( $_SERVER['HTTP_REFERER'] ) );
+		$server_referrer = isset($_SERVER['HTTP_REFERER'] ) ? strtolower( sanitize_text_field( wp_unslash($_SERVER['HTTP_REFERER']) ) ): '';
 		if( (is_admin() && defined( 'DOING_AJAX' ) && DOING_AJAX) || (strpos($server_referrer, strtolower(site_url())) !== FALSE && strpos($server_referrer, "wp-admin") !== FALSE)){
 			return true;
 		}
 		return false;
 	}
 	
-	private function checkSecurity($nonce){
+	private function checkSecurity(){
 		if(!$this->checkIfInAdmin()){
 			register_shutdown_function( array($this, 'returnOnDie'), 'Invalid nonce on frontend.');
 			if( check_ajax_referer($this->siteNonceString, 'security'  ) ){
@@ -874,14 +875,19 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function siq_admin_ajax(){
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting
 		error_reporting(0);
 		register_shutdown_function( array($this, 'handleErrors'));
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler(array($this, "errorHandler"));
 		// check nonce using checkSecurity function
-		if(!empty($_POST) && isset( $_POST['security'] ) && $this->checkSecurity( $_POST['security'] ) ){
-			$task = sanitize_text_field( $_POST['task'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if(!empty($_POST) && $this->checkSecurity() ){
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$task = !empty($_POST['task']) ? sanitize_text_field(wp_unslash($_POST['task'])) : "";
 			add_filter('wp_die_ajax_handler', array($this, 'dieHandler'));
 			// Sanitize post variables using sanitizeVariables function
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$post = $this->sanitizeVariables($_POST);
 			$this->log_error("SIQ AJAX CALL STARTED: params('".json_encode($post)."');");
 			switch($task){
@@ -900,10 +906,6 @@ class siq_plugin extends siq_shortcode{
 
 				case 'clear_configuration':
 					$result = $this->clear_configuration($post);
-					break;
-
-				case 'get_page_list':
-					$result = $this->getPageListAjax($post);
 					break;
 
 				case 'reset_style':
@@ -1160,6 +1162,7 @@ class siq_plugin extends siq_shortcode{
 	public function createCustomAjaxSearchPage(){
 		global $wpdb;
 		$newPost = "";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		$sPage = $wpdb->get_row( $wpdb->prepare("SELECT ID FROM `%5s` WHERE post_type = %s AND post_content LIKE %s AND post_status = %s ORDER BY ID DESC LIMIT 0, 1", array( $wpdb->prefix.'posts', 'page', '%[siq_ajax_search]%', 'publish') ) );
 		if(!is_null($sPage) && $sPage !="" && (int)$sPage->ID !=0){
 			$newPost 		= $sPage->ID;
@@ -1230,31 +1233,6 @@ class siq_plugin extends siq_shortcode{
 		} else {
 			return array('success' => 0, 'message' => 'Selected page doesn\'t have [siq_ajax_search] tag', 'list' => $selectPageList);
 		}
-	}
-
-	public function getPageListAjax($data){
-		$selectPageList = "";
-		if($data['show'] != 0){
-			update_option($this->pluginOptions['use_custom_search'], $data['value']);
-
-			$allpages 			= $this->getPageList();
-			$selectPageList 	= '<div class="data pageList"><label>Custom Search Page</label>';
-			$selectPageList 	.= '<select name="siq_custom_search_page">';
-			$selectPageList 	.= '<option value="" selected="">--Select Page--</option>';
-			foreach($allpages as $k => $v){
-				$selected		= ($customSearchPage !="" && $customSearchPage == $v->ID )? 'selected="selected"': "";
-				$selectPageList 	.= '<option '.$selected.' value="'.$v->ID.'">'.$v->post_title.'</option>';
-			}
-			$selectPageList 	.= '</select>';
-			$selectPageList 	.= '<div class="message">Please make sure the selected page has [siq_ajax_search] on top of the content.</div>';
-			$selectPageList 	.= '</div>';
-
-		}else{
-			delete_option($this->pluginOptions['use_custom_search']);
-		}
-		$this->_siq_sync_settings();
-		$result = array('success'=> 1, 'message'=>'Page selected', 'list'=>$selectPageList, 'show' => (int)$data['show']);
-		return $result;
 	}
 
 	public function delete_domain(){
@@ -1423,7 +1401,8 @@ class siq_plugin extends siq_shortcode{
 		}else{
 			$query = "SELECT COUNT(*) FROM `%5s` p WHERE TRIM(p.post_title) <> ''  AND p.post_password = '' ".$excludePosts." ".$allowedPostTypesFilter.$postStatus;
 		}
-		$total = $wpdb->get_var( $wpdb->prepare( $query, $wpdb->prefix.'posts') );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$total = $wpdb->get_var( $wpdb->prepare( "{$query}", "{$wpdb->prefix}posts") );
 		$this->totalPosts = $total;
 		$this->log_error("TOTAL POSTS:(".$this->totalPosts.")");
 		if (is_null($postsPerCall)) {
@@ -1462,7 +1441,8 @@ class siq_plugin extends siq_shortcode{
 
 			$excludePosts = (!empty($this->excludePostIds)) ? " AND p.ID NOT IN(".$this->excludePostIds.") " : "";
 			$query = "SELECT p.* FROM `%5s` p WHERE TRIM(p.post_title) <> '' AND p.post_password = '' ".$excludePosts." AND p.post_type IN(".$allowedPostTypes.") AND p.post_status = 'publish' ORDER BY p.ID ASC limit ".$this->currentStart.",".$this->postsPerCallForThumb." ";
-			$db_result = $wpdb->get_results( $wpdb->prepare( $query, $wpdb->prefix.'posts') );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$db_result = $wpdb->get_results( $wpdb->prepare( "{$query}", $wpdb->prefix.'posts') );
 			if(!empty($db_result)){
 				foreach($db_result as $k => $v){
 					$result['generated'][$v->ID] = parent::generateThumbnails($v);
@@ -1543,7 +1523,8 @@ class siq_plugin extends siq_shortcode{
 			$query = "SELECT p.*, GROUP_CONCAT(pm.meta_key SEPARATOR '<>') as meta_key, GROUP_CONCAT(IFNULL(pm.meta_value,'') SEPARATOR '<>') as meta_value FROM ( SELECT * from `%5s` p WHERE p.ID IN(".$this->deltaPostIDs.") ".$excludePosts." limit 0,".$this->getPostsPerDeltaCall()." ) p LEFT JOIN `%5s` pm ON p.ID = pm.post_id GROUP BY p.ID ORDER BY p.ID ASC, pm.meta_id ASC";
 
             $this->setGroupConcatLimit();
-			$dataResult = $wpdb->get_results( $wpdb->prepare( $query, array( $wpdb->prefix.'posts', $wpdb->prefix.'postmeta')) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$dataResult = $wpdb->get_results( $wpdb->prepare( "{$query}", array( $wpdb->prefix.'posts', $wpdb->prefix.'postmeta')) );
 			
 			$this->log_error("DELTA SYNC QUERY TO GET IDS: ".$query);		// Log QUERY based on current page
 			
@@ -1594,7 +1575,7 @@ class siq_plugin extends siq_shortcode{
 					$result['currentPage'] 	= $this->currentPage + 1;
 					$result['totalPosts'] 	= $this->totalPosts;
 					$result['totalPages']	= $this->totalPages;
-					$result['exclude']			= $this->excludePostIds;
+					$result['exclude']			= $this->excludePostIds; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 					$result['deltaPostIDs'] = "";
 					if($this->currentPage < $this->totalPages){
 						$result['message'] 		= 'Delta Post Sync in progress';
@@ -1696,7 +1677,8 @@ class siq_plugin extends siq_shortcode{
 			}
             $this->setGroupConcatLimit();
 			$this->log_error("QUERY: ".$query);
-            $data = $wpdb->get_results( $wpdb->prepare( $query, array( $wpdb->prefix.'posts', $wpdb->prefix.'postmeta' ) ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+            $data = $wpdb->get_results( $wpdb->prepare( "{$query}", array( $wpdb->prefix.'posts', $wpdb->prefix.'postmeta' ) ) );
 			$this->log_error("NUMBER OF POSTS FETCHED: ".count($data));
 			$dataForSubmission = array();
 			$idsForSubmission = array();
@@ -1704,7 +1686,8 @@ class siq_plugin extends siq_shortcode{
 			if(!empty($data)){
 				$dataTaxomony = array();
 				$taxQuery = "SELECT p.ID, tt.taxonomy, GROUP_CONCAT(t.name SEPARATOR '<>') as title FROM ( SELECT ID FROM `%5s` p WHERE TRIM(p.post_title) <> '' AND p.post_password = '' ".$excludePosts." ".$allowedPostTypesFilter." ".$postStatus." limit ".$this->currentStart.",".$postsPerCall." ) p INNER JOIN `%5s` tr ON tr.object_id = p.ID INNER JOIN `%5s` tt ON tt.term_taxonomy_id = tr.term_taxonomy_id INNER JOIN `%5s` t ON t.term_id = tt.term_id GROUP BY p.ID, tt.taxonomy";
-				$dataTaxomony = $wpdb->get_results( $wpdb->prepare( $taxQuery, array( $wpdb->prefix.'posts', $wpdb->prefix.'term_relationships', $wpdb->prefix.'term_taxonomy', $wpdb->prefix.'terms' ) ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				$dataTaxomony = $wpdb->get_results( $wpdb->prepare( "{$taxQuery}", array( $wpdb->prefix.'posts', $wpdb->prefix.'term_relationships', $wpdb->prefix.'term_taxonomy', "{$wpdb->prefix}terms" ) ) );
 				$queryDelta = isset($queryStartTime) ? round((float)(microtime(true) - $queryStartTime), 6): 0;
 				$this->logSyncProcessTime(($post['currentPage'] > 0 ? ($post['currentPage'] - 1) : 0), $queryDelta, false);
 				foreach($data as $k => &$v){
@@ -1982,8 +1965,8 @@ class siq_plugin extends siq_shortcode{
 		$this->deleteErrorBatchs();
 		$metaDeleteArray = array(parent::POST_THUMB_META_KEY, parent::POST_THUMB_URL_META_KEY, parent::POST_ORIG_IMG_URL_META_KEY, parent::POST_THUMB_META_KEY_LARGE, parent::POST_THUMB_URL_META_KEY_LARGE);
 		$metaDeleteString = "'".implode("','", $metaDeleteArray)."'";
-
-		$response = $wpdb->query($wpdb->prepare("DELETE FROM %5s WHERE `meta_key` IN (" . $metaDeleteString . ")", $wpdb->prefix . 'postmeta'));
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$response = $wpdb->query($wpdb->prepare("DELETE FROM %5s WHERE `meta_key` IN ({$metaDeleteString})", "{$wpdb->prefix}postmeta"));
 		
 		$result['response'] = $response;
 		$result['success'] 	= 1;
@@ -2085,6 +2068,7 @@ class siq_plugin extends siq_shortcode{
 	}
 
 	public function siq_cron_resynchronize_posts() {
+		// phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged	
 		set_time_limit(0);
 		$post = array("currentPage" => 0, 'task'=>'sync_posts', 'resetcount' => 1);
 		$indexResponse = $this->submit_for_indexing($post);
@@ -2840,7 +2824,7 @@ class siq_plugin extends siq_shortcode{
 	public function facetsTabHtml($hide = "hide", $selected = 'notselected', $tab = ""){
 		$html = "";
 		$html .= '<li id="'.$tab.'" class="'.$selected.' '.$hide.'">';
-		$html .= '<a href="'.add_query_arg("tab", "tab-6", esc_url( admin_url( 'admin.php?page=dwsearch') ) ).'">Facets</a>';
+		$html .= '<a href="'.esc_url( admin_url( 'admin.php?page=searchiq-facets-config') ).'">Facets</a>';
 		$html .= '</li>';
 		return $html;
 	}
@@ -2875,7 +2859,8 @@ class siq_plugin extends siq_shortcode{
 	private function setGroupConcatLimit(){
         $this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__);
 	    global $wpdb;
-	    $wpdb->query( $wpdb->prepare( $this->group_concat_query.'%d', $this->group_concat_limit) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	    $wpdb->query( $wpdb->prepare( "{$this->group_concat_query}%d", $this->group_concat_limit) );
         $this->logFunctionCall(__FILE__, __CLASS__, __FUNCTION__, __LINE__, true);
 	}
 	
@@ -3034,7 +3019,7 @@ class siq_plugin extends siq_shortcode{
 			if($this->areExcludeFeaturesEnabled()) {
 				$htmlExclude = $this->customFieldsFilterDropDown($fields[$postType], $postType, false);
 			}
-			$response[$postType]['html'] = array('thumbnail' => $htmlThumbnail, 'description' => $htmlDescription, 'exclude' => $htmlExclude);
+			$response[$postType]['html'] = array('thumbnail' => $htmlThumbnail, 'description' => $htmlDescription, 'exclude' => $htmlExclude); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		}
 		return array('success' => 1, 'data' => $response );
 	}

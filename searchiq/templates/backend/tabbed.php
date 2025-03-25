@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // handle enable/disable error log option change before render tabs
 if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer($this->updateOptionsNonce)){
-    $enable_api_error_log = isset($_POST['enable_api_error_log']) && !empty(sanitize_text_field($_POST['enable_api_error_log']));
+    $enable_api_error_log = isset($_POST['enable_api_error_log']) && !empty(sanitize_text_field(wp_unslash($_POST['enable_api_error_log'])));
 	if ($enable_api_error_log) {
 		$this->enableAPIErrorLog();
 	} else {
@@ -20,13 +20,16 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
     $apiErrorRecordsCount = $this->getAPIErrorRecordsCount();
     $apiErrorLogEnabled = $this->isAPIErrorLogEnabled();
     
-	$tab1Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-1" ) !== FALSE )? 'selected': 'notselected') : "selected";
-	$tab2Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-2" ) !== FALSE )? 'selected': 'notselected') : "notselected";
-	$tab3Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-3" ) !== FALSE )? 'selected': 'notselected') : "notselected";
-	$tab4Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-4" ) !== FALSE )? 'selected': 'notselected') : "notselected";
-    $tab5Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-5" ) !== FALSE )? 'selected': 'notselected') : 'notselected';
-	$tab6Selected = isset( $this->pluginSettings["facets_enabled"] ) && !!$this->pluginSettings["facets_enabled"] && isset($_GET['tab']) && strpos( $siq_current_url, "&tab=tab-6" ) !== FALSE ? "selected" : "notselected";
-    $tab7Selected = !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ? ( ( strpos( $siq_current_url, "&tab=tab-7" ) !== FALSE )? 'selected': 'notselected') : 'notselected';
+    $current_menu_page = get_current_screen()->id;
+
+	$tab1Selected = $current_menu_page == 'toplevel_page_searchiq' ? 'selected': 'notselected';
+    $tab2Selected = $current_menu_page == 'searchiq_page_searchiq-options' ? 'selected' : "notselected";
+    $tab3Selected = $current_menu_page == 'searchiq_page_searchiq-results-config' ? 'selected' : "notselected";
+    $tab4Selected = $current_menu_page == 'searchiq_page_searchiq-autocomplete-config' ? 'selected' : "notselected";
+    $tab5Selected = $current_menu_page == 'searchiq_page_searchiq-mobile-config' ? 'selected' : "notselected";
+    $tab6Selected = isset( $this->pluginSettings["facets_enabled"] ) && !!$this->pluginSettings["facets_enabled"] && $current_menu_page == 'searchiq_page_searchiq-facets-config' ? "selected" : "notselected";
+    $tab7Selected = $current_menu_page == 'searchiq_page_searchiq-api-error-log' ? 'selected' : "notselected";
+	
     if ( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) && strpos( $siq_current_url, "&tab=tab-6" ) !== FALSE && $tab6Selected != "selected") {
         $tab1Selected = "selected";
     }
@@ -41,67 +44,69 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
 <div class="backendTabbed" id="searchIqBackend">
 	<div class="tabsHeading">
 		<ul>
-			<li id="tab-1" class="<?php esc_html_e( $tab1Selected );?>">
-				<a href="<?php esc_html_e( add_query_arg("tab", "tab-1", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) );; ?>">Configuration</a>
+			<li id="tab-1" class="<?php echo esc_attr( $tab1Selected );?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=searchiq') ); ?>">Configuration</a>
 			</li>
-			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-2" );?>" class="<?php esc_html_e( $tab2Selected );?>">
-				<a href="<?php esc_html_e( add_query_arg("tab", "tab-2", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Options</a>
+			<li id="<?php echo esc_attr( empty($engineCode) ? "" : "tab-2" );?>" class="<?php echo esc_attr( $tab2Selected );?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-options') ); ?>">Options</a>
 			</li>
-			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-3" );?>" class="<?php esc_html_e( $tab3Selected );?>">
-				<a href="<?php esc_html_e( add_query_arg("tab", "tab-3", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Results Page</a>
+			<li id="<?php echo esc_attr( empty($engineCode) ? "" : "tab-3" );?>" class="<?php echo esc_attr( $tab3Selected );?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-results-config') ); ?>">Results Page</a>
 			</li>
-			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-4" );?>" class="<?php esc_html_e( $tab4Selected );?>">
-				<a href="<?php esc_html_e( add_query_arg("tab", "tab-4", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Autocomplete</a>
+			<li id="<?php echo esc_attr( empty($engineCode) ? "" : "tab-4" );?>" class="<?php echo esc_attr( $tab4Selected );?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-autocomplete-config') ); ?>">Autocomplete</a>
 			</li>
-			<li id="<?php esc_html_e( empty($engineCode) ? "" : "tab-5" );?>" class="<?php esc_html_e( $tab5Selected );?>">
-				<a href="<?php esc_html_e( add_query_arg("tab", "tab-5", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Mobile</a>
+			<li id="<?php echo esc_attr( empty($engineCode) ? "" : "tab-5" );?>" class="<?php echo esc_attr( $tab5Selected );?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=searchiq-mobile-config') ); ?>">Mobile</a>
 			</li>
             <?php
-            if (isset($this->pluginSettings["facets_enabled"]) && !!$this->pluginSettings["facets_enabled"]) {
-                echo wp_kses( $this->facetsTabHtml("", $tab6Selected, (empty($engineCode) ? "" : "tab-6")), array('li' => array( 'id' => array(), 'class' => array() ), 'a' => array('href'=> array())) );
-            }
+                if (isset($this->pluginSettings["facets_enabled"]) && !!$this->pluginSettings["facets_enabled"]) {
+                    echo wp_kses( $this->facetsTabHtml("", $tab6Selected, (empty($engineCode) ? "" : "tab-6")), array('li' => array( 'id' => array(), 'class' => array() ), 'a' => array('href'=> array())) );
+                }
 
             // API Error Log
-            ?>
-            <li id="tab-7" class="<?php esc_html_e( $tab7Selected );?>">
-                <a href="<?php esc_html_e(add_query_arg("tab", "tab-7", esc_url( admin_url( 'admin.php?page=dwsearch') ) ) ); ?>">Error Log</a>
-            </li>
+            if ($apiErrorLogEnabled || $apiErrorRecordsCount > 0) {
+                ?>
+                <li id="<?php echo esc_attr(empty($engineCode) ? "" : "tab-7"); ?>" class="<?php echo esc_attr($tab7Selected); ?>">
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=searchiq-api-error-log')); ?>">Error Log</a>
+                </li>
             <?php
+            }
             ?>
 		</ul>
 	</div>
 	<div class="tabsContent showLoader">
-		<div class="tab tab-1 <?php esc_html_e( $tab1Selected );?>">
+		<div class="tab tab-1 <?php echo esc_attr( $tab1Selected );?>">
 			<?php
                 if( (!empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) === FALSE ) || ( ( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab" ) !== FALSE ) && ( strpos( $siq_current_url, "&tab=tab-1" ) !== FALSE || strpos( $siq_current_url, "&tab=tab-6" ) !== FALSE ))) {
                     include_once(SIQ_BASE_PATH . '/templates/backend/config.php');
                 }
             ?>
 		</div>
-		<div class="tab tab-2 <?php esc_html_e( $tab2Selected );?>">
+		<div class="tab tab-2 <?php echo esc_attr( $tab2Selected );?>">
 			<?php
-                if( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-2" ) !== FALSE ) {
+                if( !empty( $siq_current_url ) && ( strpos( $siq_current_url, "&tab=tab-2" ) !== FALSE || $current_menu_page == 'searchiq_page_searchiq-options' ) ) {
                     include_once(SIQ_BASE_PATH . '/templates/backend/optionsPage.php');
                 }
             ?>
 		</div>
-		<div class="tab tab-3 <?php esc_html_e( $tab3Selected );?>">
+		<div class="tab tab-3 <?php echo esc_attr( $tab3Selected );?>">
 			<?php
-                if( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-3" ) !== FALSE ) {
+                if( !empty( $siq_current_url ) && (strpos( $siq_current_url, "&tab=tab-3" ) !== FALSE || $current_menu_page == 'searchiq_page_searchiq-results-config')) {
                     include_once(SIQ_BASE_PATH.'/templates/backend/appearance.php');
                 }
             ?>
 		</div>
-		<div class="tab tab-4 <?php esc_html_e( $tab4Selected );?>">
+		<div class="tab tab-4 <?php echo esc_attr( $tab4Selected );?>">
 			<?php
-                if( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-4" ) !== FALSE ) {
+                if( !empty( $siq_current_url ) && (strpos( $siq_current_url, "&tab=tab-4" ) !== FALSE || $current_menu_page == 'searchiq_page_searchiq-autocomplete-config') ) {
                     include_once(SIQ_BASE_PATH.'/templates/backend/appearance-autocomplete.php');
                 }
             ?>
 		</div>
-        <div class="tab tab-5 <?php esc_html_e( $tab5Selected );?>">
+        <div class="tab tab-5 <?php echo esc_attr( $tab5Selected );?>">
 			<?php
-                if( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-5" ) !== FALSE ) {
+                if( !empty( $siq_current_url ) && (strpos( $siq_current_url, "&tab=tab-5" ) !== FALSE || $current_menu_page == 'searchiq_page_searchiq-mobile-config') ) {
                     include_once(SIQ_BASE_PATH.'/templates/backend/appearance-mobile.php');
                 }
             ?>
@@ -109,9 +114,9 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
         <?php
         if (isset($this->pluginSettings["facets_enabled"]) && !!$this->pluginSettings["facets_enabled"]) {
             ?>
-            <div class="tab tab-6 <?php esc_html_e( $tab6Selected );?>">
+            <div class="tab tab-6 <?php echo esc_attr( $tab6Selected );?>">
                 <?php
-                    if( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-6" ) !== FALSE ) {
+                    if( !empty( $siq_current_url ) && (strpos( $siq_current_url, "&tab=tab-6" ) !== FALSE || $current_menu_page == 'searchiq_page_searchiq-facets-config') ) {
                         include_once(SIQ_BASE_PATH . '/templates/backend/facets.php');
                     }
                 ?>
@@ -122,9 +127,9 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
         // Error Log Tab
         if (strpos($tab7Selected, 'notselected') === false) {
             ?>
-            <div class="tab tab-7 <?php esc_html_e( $tab7Selected );?>">
+            <div class="tab tab-7 <?php echo esc_attr( $tab7Selected );?>">
                 <?php
-                if ( !empty( $siq_current_url ) && strpos( $siq_current_url, "&tab=tab-7" ) !== false ) {
+                if ( !empty( $siq_current_url ) && (strpos( $siq_current_url, "&tab=tab-7" ) !== false || $current_menu_page == 'searchiq_page_searchiq-api-error-log')) {
                     include_once(SIQ_BASE_PATH . '/templates/backend/error-log.php');
                 }
                 ?>
@@ -133,23 +138,25 @@ if(!empty( $_POST ) && isset($_POST['btnSubmitOptions']) && check_admin_referer(
         }
         ?>
 	</div>
-	<script type="text/javascript">
-
-	</script>
 </div>
 <script type="text/javascript">
     var adminUrl  		= window.location.href;
-    var adminPort 		= '<?php esc_html_e( sanitize_text_field( $_SERVER['SERVER_PORT'] ) ); ?>';
-    var adminAjax 		= '<?php esc_html_e( esc_url( admin_url( 'admin-ajax.php' ) ) );?>';
-    var adminBaseUrl 	= '<?php esc_html_e( esc_url( admin_url( 'admin.php?page=dwsearch' ) ) );?>';
+    var adminPort 		= '<?php echo !empty($_SERVER['SERVER_PORT']) ? esc_attr( sanitize_text_field( wp_unslash($_SERVER['SERVER_PORT']) ) ) : ""; ?>';
+    var adminAjax 		= '<?php echo esc_url( admin_url( 'admin-ajax.php' ) );?>';
+    var adminBaseUrl 	= '<?php echo esc_url( admin_url( 'admin.php?page=searchiq' ) );?>';
     if(adminUrl.indexOf(adminPort) > -1 && adminAjax.indexOf(adminPort) == -1){
         adminAjax 		= adminAjax.replace(/\/wp-admin/g, ':'+adminPort+'/wp-admin');
         adminBaseUrl 	= adminBaseUrl.replace(/\/wp-admin/g, ':'+adminPort+'/wp-admin');
     }
-    var siq_admin_nonce = "<?php  esc_html_e( esc_html( wp_create_nonce( $this->adminNonceString ) ) ); ?>";
+    var siq_admin_nonce = "<?php  echo esc_html( wp_create_nonce( $this->adminNonceString ) ); ?>";
     var searchEngineText = 'You already have search engines created for this domain. ';
-    $jQu	= jQuery;
-    $jQu(document).on('click', '.clearColor', function(){
-        $jQu(this).prev('.color').val("").attr("style", "").attr("value", "");
-    });
+    (function($){
+        $(document).on('click', '.clearColor', function(){
+            $(this).prev('.color').val("").attr("style", "").attr("value", "");
+        });
+        var updateNotice = '<?php do_action('_siq_settings_update_notice'); ?>';
+        if ( updateNotice != ''){
+            $(updateNotice).insertBefore('.backendTabbed');
+        }
+    })(jQuery);
 </script>
