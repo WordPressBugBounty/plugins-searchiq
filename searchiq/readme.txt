@@ -3,8 +3,8 @@ Contributors: searchiq, igorbelykh86, saurabhjaluka, findmsharma
 Tags: Search, Site Search, Better search, Autocomplete, Ajax search
 Donate link: https://searchiq.com
 Requires at least: 3.7
-Tested up to: 6.7.2
-Stable tag: 5.0
+Tested up to: 6.8
+Stable tag: 5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,9 @@ If you face an issue and need help, just send us an email to support@searchiq.co
 2. SearchIQ facet feature sample
 
 == Changelog ==
+= 5.1 =
+* Added fixes for WP-CLI compatibility
+
 = 5.0 =
 * Rebranded the plugin as per SearchIQ's latest branding
 * Cleaned up the code and updated plugin based on latest Wordpress Standards

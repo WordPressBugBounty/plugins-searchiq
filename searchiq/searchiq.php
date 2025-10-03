@@ -4,7 +4,7 @@
 	Plugin URI: https://searchiq.com/
 	Description: SearchIQ replaces default WordPress search and offers fast, relevant and a better search engine.
 	Author: searchiq 
-	Version: 5.0
+	Version: 5.1
 	Author URI: 
 	Text Domain: searchiq
 	License: GPLv2 or later
@@ -22,7 +22,7 @@ if(substr($siqpluginPath, -1) == "/" || substr($siqpluginPath, -1) == "\\" ){
 define("SIQ_BASE_URL", $siqpluginUrl);
 define("SIQ_ADMIN_URL", get_admin_url().'admin.php?page=searchiq');
 define("SIQ_BASE_PATH", $siqpluginPath);
-define("SIQ_PLUGIN_VERSION", "5.0");
+define("SIQ_PLUGIN_VERSION", "5.1");
 define("SIQ_SCRIPT_BASE", '//api.searchiq.co/');
 define("SIQ_SERVER_BASE", 'https:' . SIQ_SCRIPT_BASE);
 define("SIQ_CUSTOM_GET_PARAM", "q");
@@ -33,7 +33,7 @@ define("SIQ_TIMEOUT_SECONDS", 60);
 define("SIQ_FILE", __FILE__);
 
 
-global $siqAPIClient;
+global $siqAPIClient, $siq_plugin;
 include_once('library/core.php');
 include_once('library/hooks.php');
 include_once('library/shortcode.php');
